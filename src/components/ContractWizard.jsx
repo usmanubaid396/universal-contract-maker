@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Building2, User, Download, Plus, Trash2, Save, Sparkles, PenTool } from 'lucide-react';
 import SignatureCanvas from 'react-signature-canvas';
+import html2pdf from 'html2pdf.js';
 
 export default function ContractWizard({ template, onBack }) {
   const [step, setStep] = useState(1);
@@ -17,6 +18,7 @@ export default function ContractWizard({ template, onBack }) {
   const [aiPrompt, setAiPrompt] = useState('');
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [saveStatus, setSaveStatus] = useState('');
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const sigPadA = useRef(null);
   const sigPadB = useRef(null);
@@ -108,37 +110,30 @@ export default function ContractWizard({ template, onBack }) {
     }
   };
 
+  // Direct Browser PDF Export Function (No Print Dialog, No URLs/Timestamps)
+  const handleDownloadPDF = () => {
+    setIsDownloading(true);
+    const element = document.getElementById('printable-agreement');
+    const options = {
+      margin: 10,
+      filename: `${template.id}-agreement.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().from(element).set(options).save().then(() => {
+      setIsDownloading(false);
+    }).catch(() => {
+      setIsDownloading(false);
+      alert('Failed to generate PDF. Please try again.');
+    });
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Print styles to ensure only the clean contract prints */}
-      <style>{`
-        @media print {
-          body * {
-            visibility: hidden;
-          }
-          #printable-agreement, #printable-agreement * {
-            visibility: visible;
-          }
-          #printable-agreement {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            margin: 0;
-            padding: 20px;
-            box-shadow: none !important;
-            border: none !important;
-            background: white !important;
-            color: black !important;
-          }
-          .no-print {
-            display: none !important;
-          }
-        }
-      `}</style>
-
       {/* Top Navigation & Draft Status Bar */}
-      <div className="flex items-center justify-between no-print">
+      <div className="flex items-center justify-between">
         <button
           onClick={onBack}
           className="inline-flex items-center text-sm font-semibold text-blue-400 hover:text-blue-300 transition"
@@ -159,7 +154,7 @@ export default function ContractWizard({ template, onBack }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Wizard Form Steps */}
-        <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6 no-print">
+        <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
           <div className="flex items-center justify-between pb-6 border-b border-slate-800">
             <div>
               <span className="text-xs uppercase tracking-widest text-blue-400 font-extrabold">Step {step} of 3</span>
@@ -391,21 +386,18 @@ export default function ContractWizard({ template, onBack }) {
               </button>
             ) : (
               <button
-                onClick={() => window.print()}
-                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center shadow-lg shadow-emerald-600/25 ml-auto"
+                onClick={handleDownloadPDF}
+                disabled={isDownloading}
+                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center shadow-lg shadow-emerald-600/25 ml-auto disabled:opacity-50"
               >
-                <Download className="h-4 w-4 mr-2" /> Download / Print PDF
+                <Download className="h-4 w-4 mr-2" /> {isDownloading ? 'Generating PDF...' : 'Download PDF Document'}
               </button>
             )}
           </div>
         </div>
 
-        {/* Printable Document Preview Area */}
+        {/* Clean Printable Document Preview Area */}
         <div id="printable-agreement" className="lg:col-span-7 bg-white text-slate-900 rounded-3xl p-10 shadow-2xl font-serif relative border border-slate-200">
-          <div className="absolute top-4 right-6 uppercase tracking-widest text-[10px] font-sans font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full border border-slate-200 no-print">
-            Live Legal Preview
-          </div>
-
           <div>
             <div className="flex justify-between items-center border-b border-slate-200 pb-8 mb-8 mt-2">
               <div className="w-36">
