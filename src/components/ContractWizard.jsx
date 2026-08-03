@@ -110,19 +110,14 @@ export default function ContractWizard({ template, onBack }) {
     }
   };
 
-  // Lightweight & Fast PDF Export Configuration (Produces small ~300KB files)
   const handleDownloadPDF = () => {
     setIsDownloading(true);
     const element = document.getElementById('printable-agreement');
     const options = {
       margin: 10,
       filename: `${template.id}-agreement.pdf`,
-      image: { type: 'jpeg', quality: 0.85 }, // Compressed JPEG for low data / small file size
-      html2canvas: { 
-        scale: 1.5, // Optimized scale to keep file lightweight while maintaining readability
-        useCORS: true, 
-        logging: false 
-      },
+      image: { type: 'jpeg', quality: 0.85 },
+      html2canvas: { scale: 1.5, useCORS: true, logging: false },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
@@ -136,7 +131,6 @@ export default function ContractWizard({ template, onBack }) {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Top Navigation & Draft Status Bar */}
       <div className="flex items-center justify-between">
         <button
           onClick={onBack}
@@ -157,7 +151,6 @@ export default function ContractWizard({ template, onBack }) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Wizard Form Steps */}
         <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
           <div className="flex items-center justify-between pb-6 border-b border-slate-800">
             <div>
@@ -394,13 +387,12 @@ export default function ContractWizard({ template, onBack }) {
                 disabled={isDownloading}
                 className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center shadow-lg shadow-emerald-600/25 ml-auto disabled:opacity-50"
               >
-                <Download className="h-4 w-4 mr-2" /> {isDownloading ? 'Generating Lightweight PDF...' : 'Download PDF Document'}
+                <Download className="h-4 w-4 mr-2" /> {isDownloading ? 'Generating PDF...' : 'Download PDF Document'}
               </button>
             )}
           </div>
         </div>
 
-        {/* Printable Document Preview Area */}
         <div id="printable-agreement" className="lg:col-span-7 bg-white text-slate-900 rounded-3xl p-10 shadow-2xl font-serif relative border border-slate-200">
           <div>
             <div className="flex justify-between items-center border-b border-slate-200 pb-8 mb-8 mt-2">
@@ -502,4 +494,3 @@ export default function ContractWizard({ template, onBack }) {
     </div>
   );
 }
-```eof
