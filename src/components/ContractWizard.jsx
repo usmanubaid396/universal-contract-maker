@@ -1,15 +1,29 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Building2, User, Download, Plus, Trash2, Save, Sparkles, PenTool } from 'lucide-react';
-import SignatureCanvas from 'react-signature-canvas';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Building2, User, Download, Plus, Trash2, Save, Sparkles, Scale, FileText, Shield, Stamp } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 
 export default function ContractWizard({ template, onBack }) {
-  const [step, setStep] = useState(1);
+  const [activeTab, setActiveTab] = useState('partyA');
   
-  const [partyA, setPartyA] = useState({ name: '', representative: '', address: '', logo: '' });
-  const [partyB, setPartyB] = useState({ name: '', representative: '', address: '', logo: '' });
+  // Party A state
+  const [partyA, setPartyA] = useState({
+    name: '', representative: '', designation: '', address: '', logo: '',
+    showAdvanced: false, website: '', email: '', phone: '', taxId: ''
+  });
+
+  // Party B state
+  const [partyB, setPartyB] = useState({
+    name: '', representative: '', designation: '', address: '', logo: '',
+    showAdvanced: false, website: '', email: '', phone: '', taxId: ''
+  });
+
+  // Contract Metadata & Body
+  const [agreementTitle, setAgreementTitle] = useState(template.title);
   const [effectiveDate, setEffectiveDate] = useState(new Date().toISOString().split('T')[0]);
-  const [governingLaw, setGoverningLaw] = useState('Pakistan');
+  const [validityPeriod, setValidityPeriod] = useState('1 Year');
+  const [contractBody, setContractBody] = useState(template.description);
+  
+  // Clauses & Custom Items
   const [customClauses, setCustomClauses] = useState([
     'Both parties agree to maintain strict confidentiality regarding all project details.',
     'Any disputes arising from this agreement shall be resolved through mutual negotiation.'
@@ -17,24 +31,30 @@ export default function ContractWizard({ template, onBack }) {
   const [newClause, setNewClause] = useState('');
   const [aiPrompt, setAiPrompt] = useState('');
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+
+  // Legal Setup Options
+  const [governingLaw, setGoverningLaw] = useState('Pakistan');
+  const [disputeResolution, setDisputeResolution] = useState('Binding Arbitration');
+  const [includeNotary, setIncludeNotary] = useState(true);
+  const [includeSealArea, setIncludeSealArea] = useState(true);
+
   const [saveStatus, setSaveStatus] = useState('');
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const sigPadA = useRef(null);
-  const sigPadB = useRef(null);
-  const [signatureA, setSignatureA] = useState('');
-  const [signatureB, setSignatureB] = useState('');
-
   useEffect(() => {
-    const saved = localStorage.getItem(`draft_${template.id}`);
+    const saved = localStorage.getItem(`pro_draft_${template.id}`);
     if (saved) {
       try {
         const data = JSON.parse(saved);
         if (data.partyA) setPartyA(data.partyA);
         if (data.partyB) setPartyB(data.partyB);
+        if (data.agreementTitle) setAgreementTitle(data.agreementTitle);
         if (data.effectiveDate) setEffectiveDate(data.effectiveDate);
-        if (data.governingLaw) setGoverningLaw(data.governingLaw);
+        if (data.validityPeriod) setValidityPeriod(data.validityPeriod);
+        if (data.contractBody) setContractBody(data.contractBody);
         if (data.customClauses) setCustomClauses(data.customClauses);
+        if (data.governingLaw) setGoverningLaw(data.governingLaw);
+        if (data.disputeResolution) setDisputeResolution(data.disputeResolution);
       } catch (e) {
         console.error('Failed to load draft');
       }
@@ -42,9 +62,9 @@ export default function ContractWizard({ template, onBack }) {
   }, [template.id]);
 
   const saveDraft = () => {
-    const draftData = { partyA, partyB, effectiveDate, governingLaw, customClauses };
-    localStorage.setItem(`draft_${template.id}`, JSON.stringify(draftData));
-    setSaveStatus('Draft Saved Locally!');
+    const draftData = { partyA, partyB, agreementTitle, effectiveDate, validityPeriod, contractBody, customClauses, governingLaw, disputeResolution };
+    localStorage.setItem(`pro_draft_${template.id}`, JSON.stringify(draftData));
+    setSaveStatus('Draft Saved Successfully!');
     setTimeout(() => setSaveStatus(''), 3000);
   };
 
@@ -75,39 +95,11 @@ export default function ContractWizard({ template, onBack }) {
     if (!aiPrompt.trim()) return;
     setIsGeneratingAI(true);
     setTimeout(() => {
-      const promptLower = aiPrompt.toLowerCase();
-      let generated = `The parties agree that ${aiPrompt}. Non-compliance may result in immediate termination of this agreement.`;
-      
-      if (promptLower.includes('payment') || promptLower.includes('fee') || promptLower.includes('deposit')) {
-        generated = `Financial Terms: ${aiPrompt}. Payments shall be transferred via secure channels within 5 business days of invoicing.`;
-      } else if (promptLower.includes('deadline') || promptLower.includes('time') || promptLower.includes('delay')) {
-        generated = `Timeline & Scheduling: ${aiPrompt}. Time is of the essence, and extensions must be mutually agreed in writing.`;
-      } else if (promptLower.includes('terminate') || promptLower.includes('cancel')) {
-        generated = `Termination Clause: Either party may terminate this agreement with 14 days written notice provided to the opposing party.`;
-      }
-
+      let generated = `The parties agree that ${aiPrompt}. Non-compliance may result in immediate termination.`;
       setCustomClauses([...customClauses, generated]);
       setAiPrompt('');
       setIsGeneratingAI(false);
     }, 600);
-  };
-
-  const handleSaveSignature = (party) => {
-    if (party === 'A' && sigPadA.current) {
-      setSignatureA(sigPadA.current.getTrimmedCanvas().toDataURL('image/png'));
-    } else if (party === 'B' && sigPadB.current) {
-      setSignatureB(sigPadB.current.getTrimmedCanvas().toDataURL('image/png'));
-    }
-  };
-
-  const handleClearSignature = (party) => {
-    if (party === 'A' && sigPadA.current) {
-      sigPadA.current.clear();
-      setSignatureA('');
-    } else if (party === 'B' && sigPadB.current) {
-      sigPadB.current.clear();
-      setSignatureB('');
-    }
   };
 
   const handleDownloadPDF = () => {
@@ -115,9 +107,9 @@ export default function ContractWizard({ template, onBack }) {
     const element = document.getElementById('printable-agreement');
     const options = {
       margin: 10,
-      filename: `${template.id}-agreement.pdf`,
-      image: { type: 'jpeg', quality: 0.85 },
-      html2canvas: { scale: 1.5, useCORS: true, logging: false },
+      filename: `${template.id}-professional-agreement.pdf`,
+      image: { type: 'jpeg', quality: 0.90 },
+      html2canvas: { scale: 2, useCORS: true, logging: false },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
@@ -130,364 +122,372 @@ export default function ContractWizard({ template, onBack }) {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="max-w-7xl mx-auto space-y-6 pb-20">
+      {/* Top Header Navigation */}
+      <div className="flex items-center justify-between bg-slate-900 border border-slate-800 px-6 py-4 rounded-2xl shadow-xl">
         <button
           onClick={onBack}
           className="inline-flex items-center text-sm font-semibold text-blue-400 hover:text-blue-300 transition"
         >
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back to all templates
+          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Library
         </button>
 
         <div className="flex items-center space-x-3">
           {saveStatus && <span className="text-xs text-emerald-400 font-medium animate-pulse">{saveStatus}</span>}
           <button
             onClick={saveDraft}
-            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center border border-slate-700 transition shadow"
+            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center border border-slate-700 transition"
           >
             <Save className="h-3.5 w-3.5 mr-1.5 text-blue-400" /> Save Draft
+          </button>
+          <button
+            onClick={handleDownloadPDF}
+            disabled={isDownloading}
+            className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center shadow-lg shadow-emerald-600/25 disabled:opacity-50"
+          >
+            <Download className="h-4 w-4 mr-1.5" /> {isDownloading ? 'Exporting...' : 'Export to PDF'}
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
-          <div className="flex items-center justify-between pb-6 border-b border-slate-800">
-            <div>
-              <span className="text-xs uppercase tracking-widest text-blue-400 font-extrabold">Step {step} of 3</span>
-              <h2 className="text-xl font-bold text-white mt-1">
-                {step === 1 && 'Parties & Branding'}
-                {step === 2 && 'Terms & AI Clauses'}
-                {step === 3 && 'Signatures & Export'}
-              </h2>
-            </div>
-            <div className="flex space-x-1.5">
-              {[1, 2, 3].map((s) => (
-                <div
-                  key={s}
-                  className={`h-2.5 rounded-full transition-all duration-300 ${
-                    s === step ? 'w-8 bg-blue-500' : s < step ? 'w-2.5 bg-blue-900' : 'w-2.5 bg-slate-800'
-                  }`}
-                />
-              ))}
-            </div>
+        {/* Left Sidebar Configuration Tabs */}
+        <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-6">
+          <div className="border-b border-slate-800 pb-4">
+            <h2 className="text-lg font-bold text-white">Document Generator Pro</h2>
+            <p className="text-xs text-slate-400">Configure sections to instantly update the live preview.</p>
           </div>
 
-          {step === 1 && (
-            <div className="space-y-6">
-              <div className="bg-slate-950/60 p-5 rounded-2xl border border-slate-800 space-y-4">
-                <h3 className="text-sm font-bold text-blue-400 flex items-center">
-                  <Building2 className="h-4 w-4 mr-2" /> Party A Details (Issuer)
-                </h3>
-                <div className="space-y-3">
-                  <input
-                    type="text"
-                    placeholder="Company / Party Name"
-                    value={partyA.name}
-                    onChange={(e) => setPartyA({ ...partyA, name: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-sm text-white focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-slate-500"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Representative Name & Title"
-                    value={partyA.representative}
-                    onChange={(e) => setPartyA({ ...partyA, representative: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-sm text-white focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-slate-500"
-                  />
-                  <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Company Logo</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleLogoUpload(e, 'A')}
-                      className="w-full text-xs text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer bg-slate-900 rounded-xl border border-slate-800 p-1"
-                    />
-                  </div>
+          {/* Navigation Tabs */}
+          <div className="grid grid-cols-3 gap-2 bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
+            {[
+              { id: 'partyA', label: 'First Party' },
+              { id: 'partyB', label: 'Second Party' },
+              { id: 'text', label: 'Text & Clauses' },
+              { id: 'legal', label: 'Legal Setup' }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-2 px-3 rounded-xl text-xs font-bold transition-all ${
+                  activeTab === tab.id ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* TAB 1: FIRST PARTY */}
+          {activeTab === 'partyA' && (
+            <div className="space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center">
+                <Building2 className="h-4 w-4 mr-1.5" /> First Party Details (Issuer)
+              </h3>
+              
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1">Company Logo</label>
+                <input type="file" accept="image/*" onChange={(e) => handleLogoUpload(e, 'A')} className="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer bg-slate-950 rounded-xl border border-slate-800 p-1" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1">Company / Entity Name</label>
+                <input type="text" value={partyA.name} onChange={(e) => setPartyA({...partyA, name: e.target.value})} placeholder="Your Company Name Ltd." className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-400 mb-1">Representative</label>
+                  <input type="text" value={partyA.representative} onChange={(e) => setPartyA({...partyA, representative: e.target.value})} placeholder="John Doe" className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-400 mb-1">Designation</label>
+                  <input type="text" value={partyA.designation} onChange={(e) => setPartyA({...partyA, designation: e.target.value})} placeholder="CEO" className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:ring-2 focus:ring-blue-500 focus:outline-none" />
                 </div>
               </div>
 
-              <div className="bg-slate-950/60 p-5 rounded-2xl border border-slate-800 space-y-4">
-                <h3 className="text-sm font-bold text-blue-400 flex items-center">
-                  <User className="h-4 w-4 mr-2" /> Party B Details (Recipient)
-                </h3>
-                <div className="space-y-3">
-                  <input
-                    type="text"
-                    placeholder="Party B / Client Name"
-                    value={partyB.name}
-                    onChange={(e) => setPartyB({ ...partyB, name: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-sm text-white focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-slate-500"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Representative Name & Title"
-                    value={partyB.representative}
-                    onChange={(e) => setPartyB({ ...partyB, representative: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-sm text-white focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-slate-500"
-                  />
-                  <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Party B Logo (Optional)</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleLogoUpload(e, 'B')}
-                      className="w-full text-xs text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer bg-slate-900 rounded-xl border border-slate-800 p-1"
-                    />
-                  </div>
-                </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1">Address / Location</label>
+                <input type="text" value={partyA.address} onChange={(e) => setPartyA({...partyA, address: e.target.value})} placeholder="123 Business Avenue, Tech Park" className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:ring-2 focus:ring-blue-500 focus:outline-none" />
               </div>
+
+              {/* Advanced Contact Info Toggle */}
+              <button
+                onClick={() => setPartyA({...partyA, showAdvanced: !partyA.showAdvanced})}
+                className="text-xs text-blue-400 hover:underline font-semibold pt-1 block"
+              >
+                {partyA.showAdvanced ? '- Hide Advanced Info' : '+ Add Advanced Contact Info'}
+              </button>
+
+              {partyA.showAdvanced && (
+                <div className="space-y-3 pt-2 border-t border-slate-800 bg-slate-950/40 p-3 rounded-xl">
+                  <input type="text" value={partyA.website} onChange={(e) => setPartyA({...partyA, website: e.target.value})} placeholder="Website URL (e.g. www.company.com)" className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white" />
+                  <input type="email" value={partyA.email} onChange={(e) => setPartyA({...partyA, email: e.target.value})} placeholder="Official Email" className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white" />
+                  <input type="text" value={partyA.phone} onChange={(e) => setPartyA({...partyA, phone: e.target.value})} placeholder="Phone Number" className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white" />
+                  <input type="text" value={partyA.taxId} onChange={(e) => setPartyA({...partyA, taxId: e.target.value})} placeholder="Tax ID / Registration Number" className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white" />
+                </div>
+              )}
             </div>
           )}
 
-          {step === 2 && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
+          {/* TAB 2: SECOND PARTY */}
+          {activeTab === 'partyB' && (
+            <div className="space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center">
+                <User className="h-4 w-4 mr-1.5" /> Second Party Details (Recipient)
+              </h3>
+              
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1">Company Logo</label>
+                <input type="file" accept="image/*" onChange={(e) => handleLogoUpload(e, 'B')} className="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer bg-slate-950 rounded-xl border border-slate-800 p-1" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1">Partner Organization / Name</label>
+                <input type="text" value={partyB.name} onChange={(e) => setPartyB({...partyB, name: e.target.value})} placeholder="Partner Organization Inc." className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Effective Date</label>
-                  <input
-                    type="date"
-                    value={effectiveDate}
-                    onChange={(e) => setEffectiveDate(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  />
+                  <label className="block text-xs font-medium text-slate-400 mb-1">Representative</label>
+                  <input type="text" value={partyB.representative} onChange={(e) => setPartyB({...partyB, representative: e.target.value})} placeholder="Jane Smith" className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:ring-2 focus:ring-blue-500 focus:outline-none" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Governing Law</label>
-                  <input
-                    type="text"
-                    value={governingLaw}
-                    onChange={(e) => setGoverningLaw(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  />
+                  <label className="block text-xs font-medium text-slate-400 mb-1">Designation</label>
+                  <input type="text" value={partyB.designation} onChange={(e) => setPartyB({...partyB, designation: e.target.value})} placeholder="Managing Director" className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:ring-2 focus:ring-blue-500 focus:outline-none" />
                 </div>
               </div>
 
-              <div className="bg-gradient-to-r from-blue-950/40 to-indigo-950/40 border border-blue-500/30 p-4 rounded-2xl space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1">Address / Location</label>
+                <input type="text" value={partyB.address} onChange={(e) => setPartyB({...partyB, address: e.target.value})} placeholder="456 Corporate Blvd" className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+              </div>
+
+              <button
+                onClick={() => setPartyB({...partyB, showAdvanced: !partyB.showAdvanced})}
+                className="text-xs text-blue-400 hover:underline font-semibold pt-1 block"
+              >
+                {partyB.showAdvanced ? '- Hide Advanced Info' : '+ Add Advanced Contact Info'}
+              </button>
+
+              {partyB.showAdvanced && (
+                <div className="space-y-3 pt-2 border-t border-slate-800 bg-slate-950/40 p-3 rounded-xl">
+                  <input type="text" value={partyB.website} onChange={(e) => setPartyB({...partyB, website: e.target.value})} placeholder="Website URL" className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white" />
+                  <input type="email" value={partyB.email} onChange={(e) => setPartyB({...partyB, email: e.target.value})} placeholder="Official Email" className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white" />
+                  <input type="text" value={partyB.phone} onChange={(e) => setPartyB({...partyB, phone: e.target.value})} placeholder="Phone Number" className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white" />
+                  <input type="text" value={partyB.taxId} onChange={(e) => setPartyB({...partyB, taxId: e.target.value})} placeholder="Tax ID / Registration Number" className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white" />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 3: CONTRACT TEXT & CLAUSES */}
+          {activeTab === 'text' && (
+            <div className="space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center">
+                <FileText className="h-4 w-4 mr-1.5" /> Agreement Structure
+              </h3>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1">Agreement Title</label>
+                <input type="text" value={agreementTitle} onChange={(e) => setAgreementTitle(e.target.value)} className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-400 mb-1">Effective Date</label>
+                  <input type="date" value={effectiveDate} onChange={(e) => setEffectiveDate(e.target.value)} className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-400 mb-1">Validity Period</label>
+                  <input type="text" value={validityPeriod} onChange={(e) => setValidityPeriod(e.target.value)} placeholder="e.g. 2 Years" className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1">Main Scope / Body</label>
+                <textarea rows={3} value={contractBody} onChange={(e) => setContractBody(e.target.value)} className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+              </div>
+
+              {/* AI Clause Generator */}
+              <div className="bg-gradient-to-r from-blue-950/40 to-indigo-950/40 border border-blue-500/30 p-3 rounded-xl space-y-2">
                 <label className="block text-xs font-bold text-blue-400 flex items-center">
-                  <Sparkles className="h-4 w-4 mr-1.5 animate-pulse text-amber-400" /> Free AI Clause Assistant
+                  <Sparkles className="h-3.5 w-3.5 mr-1 text-amber-400" /> AI Clause Writer
                 </label>
                 <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="e.g., 50% deposit required upfront..."
-                    value={aiPrompt}
-                    onChange={(e) => setAiPrompt(e.target.value)}
-                    className="flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <button
-                    onClick={handleAIGenerateClause}
-                    disabled={isGeneratingAI}
-                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow"
-                  >
-                    {isGeneratingAI ? 'Writing...' : 'Generate'}
+                  <input type="text" placeholder="e.g. 50% advance payment..." value={aiPrompt} onChange={(e) => setAiPrompt(e.target.value)} className="flex-1 px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white" />
+                  <button onClick={handleAIGenerateClause} disabled={isGeneratingAI} className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold">
+                    {isGeneratingAI ? '...' : 'Add'}
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <label className="block text-xs font-medium text-slate-400">Current Agreement Clauses</label>
-                <div className="space-y-2.5 max-h-40 overflow-y-auto pr-1">
-                  {customClauses.map((clause, index) => (
-                    <div key={index} className="flex items-center justify-between bg-slate-950/80 p-3 rounded-xl border border-slate-800 text-xs">
-                      <span className="text-slate-300 pr-2 leading-relaxed"><strong>{index + 1}.</strong> {clause}</span>
-                      <button onClick={() => removeClause(index)} className="text-red-400 hover:text-red-300 p-1">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+              <div className="space-y-2">
+                <label className="block text-xs font-medium text-slate-400">Custom Clauses</label>
+                <div className="space-y-2 max-h-32 overflow-y-auto">
+                  {customClauses.map((clause, idx) => (
+                    <div key={idx} className="flex items-center justify-between bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs">
+                      <span className="text-slate-300 pr-2"><strong>{idx + 1}.</strong> {clause}</span>
+                      <button onClick={() => removeClause(idx)} className="text-red-400"><Trash2 className="h-3.5 w-3.5" /></button>
                     </div>
                   ))}
                 </div>
-
                 <div className="flex gap-2 pt-1">
-                  <input
-                    type="text"
-                    placeholder="Add manual clause..."
-                    value={newClause}
-                    onChange={(e) => setNewClause(e.target.value)}
-                    className="flex-1 px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-slate-500"
-                  />
-                  <button
-                    onClick={addClause}
-                    className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold flex items-center"
-                  >
-                    <Plus className="h-4 w-4 mr-1" /> Add
-                  </button>
+                  <input type="text" placeholder="Add manual clause..." value={newClause} onChange={(e) => setNewClause(e.target.value)} className="flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+                  <button onClick={addClause} className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold"><Plus className="h-3.5 w-3.5" /></button>
                 </div>
               </div>
             </div>
           )}
 
-          {step === 3 && (
-            <div className="space-y-6">
+          {/* TAB 4: LEGAL SETUP */}
+          {activeTab === 'legal' && (
+            <div className="space-y-4">
               <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center">
-                <PenTool className="h-4 w-4 mr-2" /> Draw Digital Signatures
+                <Scale className="h-4 w-4 mr-1.5" /> Legal Setup & Jurisdiction
               </h3>
 
-              <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
-                <div className="flex justify-between items-center text-xs text-slate-400 font-medium">
-                  <span>Party A Signature</span>
-                  <button onClick={() => handleClearSignature('A')} className="text-red-400 hover:underline">Clear</button>
-                </div>
-                <div className="bg-white rounded-lg overflow-hidden border border-slate-700 h-28">
-                  <SignatureCanvas
-                    ref={sigPadA}
-                    penColor="black"
-                    canvasProps={{ className: 'w-full h-full cursor-crosshair' }}
-                  />
-                </div>
-                <button
-                  onClick={() => handleSaveSignature('A')}
-                  className="w-full py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 rounded-lg text-xs font-semibold transition"
-                >
-                  Capture Party A Signature
-                </button>
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1">Governing Jurisdiction Country / State</label>
+                <input type="text" value={governingLaw} onChange={(e) => setGoverningLaw(e.target.value)} className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
               </div>
 
-              <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
-                <div className="flex justify-between items-center text-xs text-slate-400 font-medium">
-                  <span>Party B Signature</span>
-                  <button onClick={() => handleClearSignature('B')} className="text-red-400 hover:underline">Clear</button>
-                </div>
-                <div className="bg-white rounded-lg overflow-hidden border border-slate-700 h-28">
-                  <SignatureCanvas
-                    ref={sigPadB}
-                    penColor="black"
-                    canvasProps={{ className: 'w-full h-full cursor-crosshair' }}
-                  />
-                </div>
-                <button
-                  onClick={() => handleSaveSignature('B')}
-                  className="w-full py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 rounded-lg text-xs font-semibold transition"
-                >
-                  Capture Party B Signature
-                </button>
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1">Dispute Resolution Mechanism</label>
+                <select value={disputeResolution} onChange={(e) => setDisputeResolution(e.target.value)} className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white">
+                  <option value="Binding Arbitration">Binding Arbitration</option>
+                  <option value="Civil Litigation in Local Courts">Civil Litigation in Local Courts</option>
+                  <option value="Mutual Negotiation & Mediation">Mutual Negotiation & Mediation</option>
+                </select>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <label className="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
+                  <input type="checkbox" checked={includeNotary} onChange={(e) => setIncludeNotary(e.target.checked)} className="rounded border-slate-700 bg-slate-950 text-blue-600 focus:ring-blue-500" />
+                  <span>Include Witness / Notary Public Block</span>
+                </label>
+
+                <label className="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
+                  <input type="checkbox" checked={includeSealArea} onChange={(e) => setIncludeSealArea(e.target.checked)} className="rounded border-slate-700 bg-slate-950 text-blue-600 focus:ring-blue-500" />
+                  <span>Include Company Stamp & Seal Box</span>
+                </label>
               </div>
             </div>
           )}
-
-          <div className="flex items-center justify-between pt-6 border-t border-slate-800">
-            {step > 1 ? (
-              <button
-                onClick={() => setStep(step - 1)}
-                className="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition"
-              >
-                Previous Step
-              </button>
-            ) : <div />}
-
-            {step < 3 ? (
-              <button
-                onClick={() => setStep(step + 1)}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-blue-600/25 ml-auto"
-              >
-                Continue to Next Step
-              </button>
-            ) : (
-              <button
-                onClick={handleDownloadPDF}
-                disabled={isDownloading}
-                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center shadow-lg shadow-emerald-600/25 ml-auto disabled:opacity-50"
-              >
-                <Download className="h-4 w-4 mr-2" /> {isDownloading ? 'Generating PDF...' : 'Download PDF Document'}
-              </button>
-            )}
-          </div>
         </div>
 
-        <div id="printable-agreement" className="lg:col-span-7 bg-white text-slate-900 rounded-3xl p-10 shadow-2xl font-serif relative border border-slate-200">
-          <div>
-            <div className="flex justify-between items-center border-b border-slate-200 pb-8 mb-8 mt-2">
-              <div className="w-36">
-                {partyA.logo ? (
-                  <img src={partyA.logo} alt="Party A Logo" className="h-14 object-contain max-w-full" />
-                ) : (
-                  <div className="text-[10px] font-sans font-bold text-slate-400 border border-dashed border-slate-300 p-3 text-center rounded-lg bg-slate-50">
-                    [ Company Logo ]
-                  </div>
-                )}
-              </div>
-              <div className="text-center font-sans px-4">
-                <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-500">Binding Agreement</h4>
-                <p className="text-sm font-extrabold text-slate-900 mt-0.5">{template.title}</p>
-              </div>
-              <div className="w-36 text-right">
-                {partyB.logo ? (
-                  <img src={partyB.logo} alt="Party B Logo" className="h-14 object-contain ml-auto max-w-full" />
-                ) : (
-                  <div className="text-[10px] font-sans font-bold text-slate-400 border border-dashed border-slate-300 p-3 text-center rounded-lg bg-slate-50">
-                    [ Party B Logo ]
-                  </div>
-                )}
-              </div>
+        {/* Right Side: Professional Live Legal Document Preview */}
+        <div id="printable-agreement" className="lg:col-span-7 bg-white text-slate-900 rounded-3xl p-10 shadow-2xl font-serif relative border border-slate-200 space-y-6">
+          {/* Header Logos & Title */}
+          <div className="flex justify-between items-center border-b border-slate-200 pb-6">
+            <div className="w-32">
+              {partyA.logo ? <img src={partyA.logo} alt="Logo A" className="h-12 object-contain" /> : <div className="text-[9px] font-sans font-bold text-slate-400 border border-dashed border-slate-300 p-2 text-center rounded bg-slate-50">[Company Logo]</div>}
             </div>
-
-            <div className="space-y-5 text-xs leading-relaxed text-slate-800 font-sans">
-              <p className="text-slate-700">
-                This <strong>{template.title}</strong> ("Agreement") is executed and made effective as of <strong>{effectiveDate}</strong>, by and between the following authorized entities:
-              </p>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1">
-                  <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Party A (Issuer)</p>
-                  <p className="font-bold text-slate-900 text-sm">{partyA.name || '[Company / Issuer Name]'}</p>
-                  <p className="text-slate-600 text-[11px]">Rep: {partyA.representative || '[Representative Name]'}</p>
-                </div>
-
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1">
-                  <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Party B (Recipient)</p>
-                  <p className="font-bold text-slate-900 text-sm">{partyB.name || '[Client / Recipient Name]'}</p>
-                  <p className="text-slate-600 text-[11px]">Rep: {partyB.representative || '[Representative Name]'}</p>
-                </div>
-              </div>
-
-              <div className="pt-2">
-                <h5 className="font-bold text-slate-900 text-sm mb-1">1. Purpose & Scope</h5>
-                <p className="text-slate-700">{template.description}</p>
-              </div>
-
-              <div>
-                <h5 className="font-bold text-slate-900 text-sm mb-2">2. Terms, Conditions & Clauses</h5>
-                <ol className="list-decimal pl-4 space-y-2 text-slate-700">
-                  {customClauses.map((clause, idx) => (
-                    <li key={idx} className="pl-1 leading-normal">{clause}</li>
-                  ))}
-                </ol>
-              </div>
-
-              <div>
-                <h5 className="font-bold text-slate-900 text-sm mb-1">3. Governing Jurisdiction</h5>
-                <p className="text-slate-700">This Agreement shall be interpreted, governed, and construed in accordance with the laws of <strong>{governingLaw}</strong>.</p>
-              </div>
+            <div className="text-center font-sans px-4">
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Binding Master Agreement</h4>
+              <p className="text-sm font-extrabold text-slate-900 mt-0.5">{agreementTitle}</p>
+            </div>
+            <div className="w-32 text-right">
+              {partyB.logo ? <img src={partyB.logo} alt="Logo B" className="h-12 object-contain ml-auto" /> : <div className="text-[9px] font-sans font-bold text-slate-400 border border-dashed border-slate-300 p-2 text-center rounded bg-slate-50">[Partner Logo]</div>}
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-10 pt-16 mt-12 border-t border-slate-200 font-sans text-xs">
-            <div className="space-y-2">
-              <div className="h-16 border-b border-slate-300 flex items-end pb-1">
-                {signatureA ? (
-                  <img src={signatureA} alt="Signature A" className="h-14 object-contain" />
-                ) : (
-                  <span className="text-[10px] text-slate-400 italic">[Pending Signature]</span>
-                )}
+          {/* Intro Paragraph */}
+          <div className="text-xs font-sans leading-relaxed text-slate-800 space-y-4">
+            <p>
+              This <strong>{agreementTitle}</strong> ("Agreement") is entered into and made effective as of <strong>{effectiveDate}</strong>, with a validity duration of <strong>{validityPeriod}</strong>, by and between the following authorized entities:
+            </p>
+
+            {/* Parties Box */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
+                <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">First Party (Issuer)</p>
+                <p className="font-bold text-slate-900 text-xs">{partyA.name || '[Company Name]'}</p>
+                <p className="text-slate-600 text-[10px]">Rep: {partyA.representative || '[Name]'} ({partyA.designation || 'CEO'})</p>
+                <p className="text-slate-600 text-[10px]">Location: {partyA.address || '[Address]'}</p>
+                {partyA.showAdvanced && partyA.taxId && <p className="text-slate-600 text-[10px]">Tax ID: {partyA.taxId}</p>}
               </div>
-              <div>
-                <p className="font-bold text-slate-900">For: {partyA.name || 'Party A (Issuer)'}</p>
-                <p className="text-slate-500 text-[11px]">Authorized Corporate Signature</p>
+
+              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
+                <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Second Party (Recipient)</p>
+                <p className="font-bold text-slate-900 text-xs">{partyB.name || '[Partner Name]'}</p>
+                <p className="text-slate-600 text-[10px]">Rep: {partyB.representative || '[Name]'} ({partyB.designation || 'Director'})</p>
+                <p className="text-slate-600 text-[10px]">Location: {partyB.address || '[Address]'}</p>
+                {partyB.showAdvanced && partyB.taxId && <p className="text-slate-600 text-[10px]">Tax ID: {partyB.taxId}</p>}
               </div>
             </div>
 
-            <div className="space-y-2">
-              <div className="h-16 border-b border-slate-300 flex items-end pb-1">
-                {signatureB ? (
-                  <img src={signatureB} alt="Signature B" className="h-14 object-contain" />
-                ) : (
-                  <span className="text-[10px] text-slate-400 italic">[Pending Signature]</span>
+            {/* Scope */}
+            <div>
+              <h5 className="font-bold text-slate-900 text-xs mb-1">1. Purpose & Scope</h5>
+              <p className="text-slate-700">{contractBody}</p>
+            </div>
+
+            {/* Clauses */}
+            <div>
+              <h5 className="font-bold text-slate-900 text-xs mb-1.5">2. Terms, Conditions & Clauses</h5>
+              <ol className="list-decimal pl-4 space-y-1.5 text-slate-700">
+                {customClauses.map((clause, idx) => (
+                  <li key={idx} className="pl-1">{clause}</li>
+                ))}
+              </ol>
+            </div>
+
+            {/* Legal Setup & Dispute Resolution */}
+            <div>
+              <h5 className="font-bold text-slate-900 text-xs mb-1">3. Governing Law & Dispute Resolution</h5>
+              <p className="text-slate-700">
+                This Agreement shall be governed by the laws of <strong>{governingLaw}</strong>. Any unresolved disputes shall be settled through <strong>{disputeResolution}</strong>.
+              </p>
+            </div>
+          </div>
+
+          {/* Execution Signatures & Stamp Blocks (No digital signature pads, clean physical signing lines) */}
+          <div className="pt-8 border-t border-slate-200 font-sans text-xs space-y-8">
+            <div className="grid grid-cols-2 gap-10">
+              <div className="space-y-8">
+                <div>
+                  <p className="font-bold text-slate-900 mb-1">For: {partyA.name || 'First Party'}</p>
+                  <div className="h-14 border-b border-slate-400 flex items-end pb-1">
+                    <span className="text-[10px] text-slate-400 italic">Authorized Signature & Date</span>
+                  </div>
+                </div>
+                {includeSealArea && (
+                  <div className="w-28 h-28 border border-dashed border-slate-400 rounded-full flex flex-col items-center justify-center text-center p-2 text-slate-400 text-[9px]">
+                    <Stamp className="h-5 w-5 mb-1 text-slate-300" />
+                    <span>[ Company Stamp / Seal ]</span>
+                  </div>
                 )}
               </div>
-              <div>
-                <p className="font-bold text-slate-900">For: {partyB.name || 'Party B (Recipient)'}</p>
-                <p className="text-slate-500 text-[11px]">Authorized Signature / Acceptance</p>
+
+              <div className="space-y-8">
+                <div>
+                  <p className="font-bold text-slate-900 mb-1">For: {partyB.name || 'Second Party'}</p>
+                  <div className="h-14 border-b border-slate-400 flex items-end pb-1">
+                    <span className="text-[10px] text-slate-400 italic">Authorized Signature & Date</span>
+                  </div>
+                </div>
+                {includeSealArea && (
+                  <div className="w-28 h-28 border border-dashed border-slate-400 rounded-full flex flex-col items-center justify-center text-center p-2 text-slate-400 text-[9px]">
+                    <Stamp className="h-5 w-5 mb-1 text-slate-300" />
+                    <span>[ Partner Seal ]</span>
+                  </div>
+                )}
               </div>
             </div>
+
+            {includeNotary && (
+              <div className="pt-4 border-t border-dashed border-slate-300 grid grid-cols-2 gap-10 text-[11px]">
+                <div>
+                  <p className="font-semibold text-slate-700">Witness 1:</p>
+                  <div className="h-10 border-b border-slate-400 mt-2"></div>
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-700">Witness 2 / Notary Public:</p>
+                  <div className="h-10 border-b border-slate-400 mt-2"></div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
