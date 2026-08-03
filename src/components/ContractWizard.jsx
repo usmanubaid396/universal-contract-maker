@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Building2, User, FileCheck, Download, Plus, Trash2, Save, Sparkles, PenTool } from 'lucide-react';
+import { ArrowLeft, Building2, User, Download, Plus, Trash2, Save, Sparkles, PenTool } from 'lucide-react';
 import SignatureCanvas from 'react-signature-canvas';
 
 export default function ContractWizard({ template, onBack }) {
   const [step, setStep] = useState(1);
   
-  // Form State initialized with LocalStorage check if available
   const [partyA, setPartyA] = useState({ name: '', representative: '', address: '', logo: '' });
   const [partyB, setPartyB] = useState({ name: '', representative: '', address: '', logo: '' });
   const [effectiveDate, setEffectiveDate] = useState(new Date().toISOString().split('T')[0]);
@@ -19,13 +18,11 @@ export default function ContractWizard({ template, onBack }) {
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [saveStatus, setSaveStatus] = useState('');
 
-  // Signature Refs
   const sigPadA = useRef(null);
   const sigPadB = useRef(null);
   const [signatureA, setSignatureA] = useState('');
   const [signatureB, setSignatureB] = useState('');
 
-  // Load saved draft on mount
   useEffect(() => {
     const saved = localStorage.getItem(`draft_${template.id}`);
     if (saved) {
@@ -42,7 +39,6 @@ export default function ContractWizard({ template, onBack }) {
     }
   }, [template.id]);
 
-  // Save draft function (100% Free LocalStorage)
   const saveDraft = () => {
     const draftData = { partyA, partyB, effectiveDate, governingLaw, customClauses };
     localStorage.setItem(`draft_${template.id}`, JSON.stringify(draftData));
@@ -50,7 +46,6 @@ export default function ContractWizard({ template, onBack }) {
     setTimeout(() => setSaveStatus(''), 3000);
   };
 
-  // Handle Logo Image Upload to Base64
   const handleLogoUpload = (e, party) => {
     const file = e.target.files[0];
     if (file) {
@@ -74,7 +69,6 @@ export default function ContractWizard({ template, onBack }) {
     setCustomClauses(customClauses.filter((_, i) => i !== index));
   };
 
-  // Free Client-Side AI Clause Assistant Generator
   const handleAIGenerateClause = () => {
     if (!aiPrompt.trim()) return;
     setIsGeneratingAI(true);
@@ -96,7 +90,6 @@ export default function ContractWizard({ template, onBack }) {
     }, 600);
   };
 
-  // Save Signatures from Canvas
   const handleSaveSignature = (party) => {
     if (party === 'A' && sigPadA.current) {
       setSignatureA(sigPadA.current.getTrimmedCanvas().toDataURL('image/png'));
@@ -117,7 +110,6 @@ export default function ContractWizard({ template, onBack }) {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Top Navigation & Draft Status Bar */}
       <div className="flex items-center justify-between">
         <button
           onClick={onBack}
@@ -138,7 +130,6 @@ export default function ContractWizard({ template, onBack }) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Side: Wizard Form Steps */}
         <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
           <div className="flex items-center justify-between pb-6 border-b border-slate-800">
             <div>
@@ -161,7 +152,6 @@ export default function ContractWizard({ template, onBack }) {
             </div>
           </div>
 
-          {/* STEP 1: Parties & Logos */}
           {step === 1 && (
             <div className="space-y-6">
               <div className="bg-slate-950/60 p-5 rounded-2xl border border-slate-800 space-y-4">
@@ -228,7 +218,6 @@ export default function ContractWizard({ template, onBack }) {
             </div>
           )}
 
-          {/* STEP 2: Terms & AI Clause Assistant */}
           {step === 2 && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
@@ -252,7 +241,6 @@ export default function ContractWizard({ template, onBack }) {
                 </div>
               </div>
 
-              {/* Free AI Clause Generator Box */}
               <div className="bg-gradient-to-r from-blue-950/40 to-indigo-950/40 border border-blue-500/30 p-4 rounded-2xl space-y-3">
                 <label className="block text-xs font-bold text-blue-400 flex items-center">
                   <Sparkles className="h-4 w-4 mr-1.5 animate-pulse text-amber-400" /> Free AI Clause Assistant
@@ -307,14 +295,12 @@ export default function ContractWizard({ template, onBack }) {
             </div>
           )}
 
-          {/* STEP 3: Digital Signatures */}
           {step === 3 && (
             <div className="space-y-6">
               <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center">
                 <PenTool className="h-4 w-4 mr-2" /> Draw Digital Signatures
               </h3>
 
-              {/* Party A Sign Pad */}
               <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
                 <div className="flex justify-between items-center text-xs text-slate-400 font-medium">
                   <span>Party A Signature</span>
@@ -335,7 +321,6 @@ export default function ContractWizard({ template, onBack }) {
                 </button>
               </div>
 
-              {/* Party B Sign Pad */}
               <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
                 <div className="flex justify-between items-center text-xs text-slate-400 font-medium">
                   <span>Party B Signature</span>
@@ -358,7 +343,6 @@ export default function ContractWizard({ template, onBack }) {
             </div>
           )}
 
-          {/* Wizard Action Buttons */}
           <div className="flex items-center justify-between pt-6 border-t border-slate-800">
             {step > 1 ? (
               <button
@@ -387,14 +371,12 @@ export default function ContractWizard({ template, onBack }) {
           </div>
         </div>
 
-        {/* Right Side: Professional Document Live Preview */}
         <div className="lg:col-span-7 bg-white text-slate-900 rounded-3xl p-10 shadow-2xl font-serif relative border border-slate-200">
           <div className="absolute top-4 right-6 uppercase tracking-widest text-[10px] font-sans font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
             Live Legal Preview
           </div>
 
           <div>
-            {/* Logos & Header Section */}
             <div className="flex justify-between items-center border-b border-slate-200 pb-8 mb-8 mt-2">
               <div className="w-36">
                 {partyA.logo ? (
@@ -420,7 +402,6 @@ export default function ContractWizard({ template, onBack }) {
               </div>
             </div>
 
-            {/* Document Body Content */}
             <div className="space-y-5 text-xs leading-relaxed text-slate-800 font-sans">
               <p className="text-slate-700">
                 This <strong>{template.title}</strong> ("Agreement") is executed and made effective as of <strong>{effectiveDate}</strong>, by and between the following authorized entities:
@@ -461,7 +442,6 @@ export default function ContractWizard({ template, onBack }) {
             </div>
           </div>
 
-          {/* Professional Digital Signature Block */}
           <div className="grid grid-cols-2 gap-10 pt-16 mt-12 border-t border-slate-200 font-sans text-xs">
             <div className="space-y-2">
               <div className="h-16 border-b border-slate-300 flex items-end pb-1">
