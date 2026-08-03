@@ -156,18 +156,18 @@ function HomeView() {
   return (
     <div className="space-y-12">
       {/* Hero Section */}
-      <div className="text-center max-w-4xl mx-auto space-y-6">
+      <div className="text-center max-w-3xl mx-auto space-y-6">
         <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold tracking-wide">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>100+ Free Professional Legal Templates</span>
+          <span>100 Professional Legal Agreement Templates</span>
         </div>
         
         <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.1]">
           Free Contract Generator & AI Agreement Maker
         </h1>
         
-        <p className="text-slate-400 text-lg sm:text-xl font-normal leading-relaxed max-w-2xl mx-auto">
-          The ultimate <strong className="text-slate-200">free contract maker</strong> and <strong className="text-slate-200">free AI contract generator</strong>. Search keywords, customize clauses, add your branding, and export export-ready PDFs instantly.
+        <p className="text-slate-400 text-lg sm:text-xl font-normal leading-relaxed">
+          The ultimate <strong className="text-slate-200">free contract maker</strong> and <strong className="text-slate-200">free AI contract generator</strong>. Search keywords, customize clauses, add your brand logos, and generate export-ready agreements instantly.
         </p>
 
         {/* Search Bar */}
@@ -180,7 +180,7 @@ function HomeView() {
                 type="text"
                 value={searchQuery}
                 onChange={handleSearchChange}
-                placeholder="Search templates e.g., 'freelance contract', 'nda', 'loan agreement'..."
+                placeholder="Search keywords e.g., 'personal trainer', 'nda', 'loan'..."
                 className="w-full bg-transparent text-slate-100 placeholder-slate-500 focus:outline-none text-base font-medium"
               />
             </div>
@@ -209,7 +209,7 @@ function HomeView() {
       <div className="space-y-6 pt-6">
         <div className="flex items-center justify-between border-b border-slate-800 pb-4">
           <h2 className="text-xl font-bold text-white flex items-center">
-            <FileText className="w-5 h-5 text-blue-500 mr-2" /> Free Agreement Library
+            <FileText className="w-5 h-5 text-blue-500 mr-2" /> Agreement Library
           </h2>
           <span className="text-xs text-slate-400 font-medium">
             Showing {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, filteredTemplates.length)} of {filteredTemplates.length} templates
@@ -245,7 +245,7 @@ function HomeView() {
 
               <div className="pt-6 mt-6 border-t border-slate-800/80 flex items-center justify-between">
                 <span className="text-xs text-slate-400 font-medium flex items-center">
-                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400 mr-1.5" /> Free & Customizable
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400 mr-1.5" /> Ready to Fill
                 </span>
                 <button className="inline-flex items-center text-sm font-semibold text-blue-400 group-hover:translate-x-1 transition-transform">
                   Build Now <ArrowRight className="w-4 h-4 ml-1.5" />
@@ -293,16 +293,16 @@ function HomeView() {
         )}
       </div>
 
-      {/* Enterprise-Grade Semantic SEO Content Block */}
+      {/* SEO Keyword Rich Content Section */}
       <section className="bg-slate-900/50 border border-slate-800/80 rounded-3xl p-8 sm:p-12 mt-16 space-y-6 text-slate-400 text-sm leading-relaxed">
         <h2 className="text-2xl font-bold text-white tracking-tight">
-          Why Universal Contract Pro is the #1 Free Contract Generator & AI Agreement Maker
+          Why Choose Our Free Contract Generator & AI Agreement Maker?
         </h2>
         <p>
-          Drafting legally sound agreements shouldn't require exorbitant legal fees. As the leading <strong className="text-slate-200">free contract generator</strong> and <strong className="text-slate-200">free agreement maker</strong>, our platform delivers enterprise-grade document automation for freelancers, startups, and established enterprises. Whether you are looking for a reliable <strong className="text-slate-200">free contract maker</strong> or a comprehensive <strong className="text-slate-200">free agreement maker</strong>, our system provides over 100 fully customizable legal templates tailored to your jurisdiction.
+          Whether you are looking for a reliable <strong className="text-slate-200">free contract generator</strong>, a professional <strong className="text-slate-200">free agreement maker</strong>, or an intuitive <strong className="text-slate-200">free contract maker</strong>, our platform provides everything you need. As an advanced <strong className="text-slate-200">free agreement maker</strong> and <strong className="text-slate-200">free AI contract generator</strong>, we make drafting custom legal documents fast and accessible.
         </p>
         <p>
-          Leveraging cutting-edge artificial intelligence, our <strong className="text-slate-200">free AI contract generator</strong> and <strong className="text-slate-200">free AI agreement maker</strong> dynamically construct bespoke clauses, compliance terms, and indemnification policies in seconds. Experience the precision of our <strong className="text-slate-200">free ai contract maker</strong> and <strong className="text-slate-200">free ai agreement maker</strong> to secure your intellectual property, employment terms, and commercial transactions instantly and securely.
+          Utilize our <strong className="text-slate-200">free AI agreement maker</strong>, <strong className="text-slate-200">free ai contract maker</strong>, and <strong className="text-slate-200">free ai agreement maker</strong> suite to effortlessly draft custom NDAs, freelance agreements, sales contracts, and business terms completely free.
         </p>
       </section>
     </div>
