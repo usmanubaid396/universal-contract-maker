@@ -110,7 +110,35 @@ export default function ContractWizard({ template, onBack }) {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Print styles to ensure only the clean contract prints */}
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          #printable-agreement, #printable-agreement * {
+            visibility: visible;
+          }
+          #printable-agreement {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            margin: 0;
+            padding: 20px;
+            box-shadow: none !important;
+            border: none !important;
+            background: white !important;
+            color: black !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+        }
+      `}</style>
+
+      {/* Top Navigation & Draft Status Bar */}
+      <div className="flex items-center justify-between no-print">
         <button
           onClick={onBack}
           className="inline-flex items-center text-sm font-semibold text-blue-400 hover:text-blue-300 transition"
@@ -130,7 +158,8 @@ export default function ContractWizard({ template, onBack }) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
+        {/* Wizard Form Steps */}
+        <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6 no-print">
           <div className="flex items-center justify-between pb-6 border-b border-slate-800">
             <div>
               <span className="text-xs uppercase tracking-widest text-blue-400 font-extrabold">Step {step} of 3</span>
@@ -371,8 +400,9 @@ export default function ContractWizard({ template, onBack }) {
           </div>
         </div>
 
-        <div className="lg:col-span-7 bg-white text-slate-900 rounded-3xl p-10 shadow-2xl font-serif relative border border-slate-200">
-          <div className="absolute top-4 right-6 uppercase tracking-widest text-[10px] font-sans font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+        {/* Printable Document Preview Area */}
+        <div id="printable-agreement" className="lg:col-span-7 bg-white text-slate-900 rounded-3xl p-10 shadow-2xl font-serif relative border border-slate-200">
+          <div className="absolute top-4 right-6 uppercase tracking-widest text-[10px] font-sans font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full border border-slate-200 no-print">
             Live Legal Preview
           </div>
 
