@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import Fuse from 'fuse.js';
-import { Search, FileText, ArrowRight, ShieldCheck, Sparkles, CheckCircle, Scale, Zap, Lock } from 'lucide-react';
+import { Search, FileText, ArrowRight, ShieldCheck, Sparkles, CheckCircle, Scale, Zap, Lock, ChevronLeft, ChevronRight } from 'lucide-react';
 import ContractWizard from './components/ContractWizard';
 
 const contractTemplates = [
@@ -110,6 +110,8 @@ const contractTemplates = [
 function HomeView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12; // Shows 12 items per page for a clean professional look
   const navigate = useNavigate();
 
   const fuse = useMemo(() => {
@@ -124,13 +126,33 @@ function HomeView() {
   }, []);
 
   const filteredTemplates = useMemo(() => {
-    if (!searchQuery.trim()) {
-      if (selectedCategory === 'All') return contractTemplates;
-      return contractTemplates.filter(t => t.category === selectedCategory);
+    let results = contractTemplates;
+    if (searchQuery.trim()) {
+      results = fuse.search(searchQuery).map(result => result.item);
     }
-    const results = fuse.search(searchQuery);
-    return results.map(result => result.item);
+    if (selectedCategory !== 'All') {
+      results = results.filter(t => t.category === selectedCategory);
+    }
+    return results;
   }, [searchQuery, selectedCategory, fuse]);
+
+  // Pagination calculation
+  const totalPages = Math.ceil(filteredTemplates.length / itemsPerPage) || 1;
+  const paginatedTemplates = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredTemplates.slice(start, start + itemsPerPage);
+  }, [filteredTemplates, currentPage]);
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+    setSearchQuery('');
+    setCurrentPage(1); // Reset to page 1 on category change
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1); // Reset to page 1 on search
+  };
 
   return (
     <div className="space-y-12">
@@ -158,7 +180,7 @@ function HomeView() {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
                 placeholder="Search keywords e.g., 'personal trainer', 'nda', 'loan'..."
                 className="w-full bg-transparent text-slate-100 placeholder-slate-500 focus:outline-none text-base font-medium"
               />
@@ -170,7 +192,7 @@ function HomeView() {
             {categories.map((category) => (
               <button
                 key={category}
-                onClick={() => { setSelectedCategory(category); setSearchQuery(''); }}
+                onClick={() => handleCategoryChange(category)}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
                   selectedCategory === category && !searchQuery
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 scale-105'
@@ -190,11 +212,13 @@ function HomeView() {
           <h2 className="text-xl font-bold text-white flex items-center">
             <FileText className="w-5 h-5 text-blue-500 mr-2" /> Agreement Library
           </h2>
-          <span className="text-xs text-slate-400 font-medium">Showing {filteredTemplates.length} templates</span>
+          <span className="text-xs text-slate-400 font-medium">
+            Showing {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, filteredTemplates.length)} of {filteredTemplates.length} templates
+          </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTemplates.map((template) => (
+          {paginatedTemplates.map((template) => (
             <div
               key={template.id}
               onClick={() => navigate(`/agreement/${template.id}`)}
@@ -231,6 +255,43 @@ function HomeView() {
             </div>
           ))}
         </div>
+
+        {filteredTemplates.length === 0 && (
+          <div className="text-center py-16 bg-slate-900/40 rounded-2xl border border-slate-800">
+            <p className="text-slate-400 text-base mb-4">No matching agreements found.</p>
+            <button
+              onClick={() => { setSelectedCategory('All'); setSearchQuery(''); setCurrentPage(1); }}
+              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition shadow-lg shadow-blue-600/20"
+            >
+              View All Templates
+            </button>
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center space-x-4 pt-8">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-slate-900 border border-slate-800 text-slate-300 rounded-xl text-xs font-semibold flex items-center hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition"
+            >
+              <ChevronLeft className="w-4 h-4 mr-1" /> Previous
+            </button>
+
+            <span className="text-xs text-slate-400 font-medium">
+              Page <strong className="text-white">{currentPage}</strong> of <strong className="text-white">{totalPages}</strong>
+            </span>
+
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 bg-slate-900 border border-slate-800 text-slate-300 rounded-xl text-xs font-semibold flex items-center hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition"
+            >
+              Next <ChevronRight className="w-4 h-4 ml-1" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
