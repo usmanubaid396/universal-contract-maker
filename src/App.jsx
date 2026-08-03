@@ -104,7 +104,7 @@ const contractTemplates = [
   { id: 'plant-care', title: 'Plant-Care Agreement', category: 'Home', description: 'Care of plants while the owner is away, including payment and instructions.', keywords: ['plant care', 'watering plants', 'gardener stay', 'botanical care'] },
   { id: 'shared-pet-ownership', title: 'Shared-Pet-Ownership Agreement', category: 'Personal', description: 'Costs, care schedule, decision-making, and what happens if the arrangement ends.', keywords: ['shared pet ownership', 'co-parent pet', 'dog custody', 'pet sharing'] },
   { id: 'private-parking-space', title: 'Private Parking-Space Licence Agreement', category: 'Real Estate', description: 'Permission to use a specific parking space; different from a property lease.', keywords: ['private parking space', 'parking spot rental', 'garage space licence'] },
-  { id: 'hobby-group-club', title: 'Hobby-Group or Club Membership Agreement', category: 'Personal', description: 'Membership fees, conduct rules, activities, and removal process.', keywords: ['hobby group', 'club membership', 'society rules', 'association agreement'] }
+  { id: 'hobby-group-club', title: 'Hobby-Group or Club Membership Agreement', category: 'Personal', description: 'Membership fees, conduct rules, activities, and removal process.', keywords: ['hobby group', 'club membership', 'society rules', 'association agreement']
 ];
 
 function HomeView() {
@@ -156,7 +156,7 @@ function HomeView() {
   return (
     <div className="space-y-12">
       {/* Hero Section */}
-      <div className="text-center max-w-3xl mx-auto space-y-6">
+      <div className="text-center max-w-4xl mx-auto space-y-6">
         <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold tracking-wide">
           <Sparkles className="w-3.5 h-3.5" />
           <span>100+ Free Professional Legal Templates</span>
@@ -166,7 +166,7 @@ function HomeView() {
           Free Contract Generator & AI Agreement Maker
         </h1>
         
-        <p className="text-slate-400 text-lg sm:text-xl font-normal leading-relaxed">
+        <p className="text-slate-400 text-lg sm:text-xl font-normal leading-relaxed max-w-2xl mx-auto">
           The ultimate <strong className="text-slate-200">free contract maker</strong> and <strong className="text-slate-200">free AI contract generator</strong>. Search keywords, customize clauses, add your branding, and export export-ready PDFs instantly.
         </p>
 
@@ -292,6 +292,19 @@ function HomeView() {
           </div>
         )}
       </div>
+
+      {/* Enterprise-Grade Semantic SEO Content Block */}
+      <section className="bg-slate-900/50 border border-slate-800/80 rounded-3xl p-8 sm:p-12 mt-16 space-y-6 text-slate-400 text-sm leading-relaxed">
+        <h2 className="text-2xl font-bold text-white tracking-tight">
+          Why Universal Contract Pro is the #1 Free Contract Generator & AI Agreement Maker
+        </h2>
+        <p>
+          Drafting legally sound agreements shouldn't require exorbitant legal fees. As the leading <strong className="text-slate-200">free contract generator</strong> and <strong className="text-slate-200">free agreement maker</strong>, our platform delivers enterprise-grade document automation for freelancers, startups, and established enterprises. Whether you are looking for a reliable <strong className="text-slate-200">free contract maker</strong> or a comprehensive <strong className="text-slate-200">free agreement maker</strong>, our system provides over 100 fully customizable legal templates tailored to your jurisdiction.
+        </p>
+        <p>
+          Leveraging cutting-edge artificial intelligence, our <strong className="text-slate-200">free AI contract generator</strong> and <strong className="text-slate-200">free AI agreement maker</strong> dynamically construct bespoke clauses, compliance terms, and indemnification policies in seconds. Experience the precision of our <strong className="text-slate-200">free ai contract maker</strong> and <strong className="text-slate-200">free ai agreement maker</strong> to secure your intellectual property, employment terms, and commercial transactions instantly and securely.
+        </p>
+      </section>
     </div>
   );
 }
