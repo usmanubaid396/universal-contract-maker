@@ -46,6 +46,23 @@ export default function ContractWizard({ template, onBack }) {
     }
   };
 
+  // Check if current agreement template actually requires legal setup & dispute options
+  // (e.g. strict business, commercial, employment, vendor, service, financial contracts)
+  const templateTitleLower = (template.title || '').toLowerCase();
+  const templateDescLower = (template.description || '').toLowerCase();
+  
+  const isCasualOrNonLegalTemplate = 
+    templateTitleLower.includes('thank') || 
+    templateTitleLower.includes('birthday') || 
+    templateTitleLower.includes('note') || 
+    templateTitleLower.includes('invitation') || 
+    templateTitleLower.includes('casual') || 
+    templateTitleLower.includes('personal letter') ||
+    templateDescLower.includes('informal') ||
+    templateDescLower.includes('personal greeting');
+
+  const requiresLegalSetup = !isCasualOrNonLegalTemplate;
+
   // Contract Metadata & Body
   const [agreementTitle, setAgreementTitle] = useState(template.title);
   const [effectiveDate, setEffectiveDate] = useState(new Date().toISOString().split('T')[0]);
@@ -61,7 +78,7 @@ export default function ContractWizard({ template, onBack }) {
   const [aiPrompt, setAiPrompt] = useState('');
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
-  // Expanded Legal Setup & Dispute Options with 102 types list & Search
+  // Legal Setup & Dispute Options (Only for eligible templates)
   const [governingLaw, setGoverningLaw] = useState('Pakistan');
   const [disputeResolution, setDisputeResolution] = useState('Binding Arbitration');
   const [disputeSearchQuery, setDisputeSearchQuery] = useState('');
@@ -173,7 +190,7 @@ export default function ContractWizard({ template, onBack }) {
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem(`pro_max_search_disputes_${template.id}`);
+    const saved = localStorage.getItem(`pro_conditional_legal_${template.id}`);
     if (saved) {
       try {
         const data = JSON.parse(saved);
@@ -207,7 +224,7 @@ export default function ContractWizard({ template, onBack }) {
       includeGoverningLawClause, includeSeverabilityClause, includeEntireAgreementClause,
       includeConfidentialityClause, includeLimitationOfLiability, includeForceMajeure 
     };
-    localStorage.setItem(`pro_max_search_disputes_${template.id}`, JSON.stringify(draftData));
+    localStorage.setItem(`pro_conditional_legal_${template.id}`, JSON.stringify(draftData));
     setSaveStatus('Draft Saved Successfully!');
     setTimeout(() => setSaveStatus(''), 3000);
   };
@@ -289,16 +306,18 @@ export default function ContractWizard({ template, onBack }) {
         <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-6">
           <div className="border-b border-slate-800 pb-4">
             <h2 className="text-lg font-bold text-white">Document Generator Pro</h2>
-            <p className="text-xs text-slate-400">Configure parties, search 102 dispute types, select clauses, and watermarks.</p>
+            <p className="text-xs text-slate-400">
+              {requiresLegalSetup ? 'Commercial/Legal Agreement Mode: Includes Dispute & Jurisdiction controls.' : 'Standard Document Mode: Legal options omitted for non-legal template type.'}
+            </p>
           </div>
 
-          {/* Navigation Tabs */}
-          <div className="grid grid-cols-3 gap-1.5 bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
+          {/* Navigation Tabs (Conditional Legal tab) */}
+          <div className={`grid ${requiresLegalSetup ? 'grid-cols-3' : 'grid-cols-2'} gap-1.5 bg-slate-950 p-1.5 rounded-2xl border border-slate-800`}>
             {[
               { id: 'partyA', label: 'Party A' },
               { id: 'partyB', label: 'Party B' },
               { id: 'text', label: 'Text' },
-              { id: 'legal', label: 'Legal' },
+              ...(requiresLegalSetup ? [{ id: 'legal', label: 'Legal' }] : []),
               { id: 'watermark', label: 'Watermark' },
               { id: 'colors', label: 'Colors' }
             ].map((tab) => (
@@ -351,7 +370,7 @@ export default function ContractWizard({ template, onBack }) {
                   <input type="text" value={partyA.taxId} onChange={(e) => setPartyA({...partyA, taxId: e.target.value})} placeholder="Tax ID / Registration Number" className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white" />
                   
                   <div className="space-y-2 pt-2 border-t border-slate-800">
-                    <p className="text-[11px] font-bold text-slate-300">Custom Custom Fields:</p>
+                    <p className="text-[11px] font-bold text-slate-300">Custom Fields:</p>
                     {partyA.customFields.map((cf, idx) => (
                       <div key={idx} className="flex gap-2 items-center">
                         <input type="text" placeholder="Label" value={cf.label} onChange={(e) => updatePartyCustomField('A', idx, 'label', e.target.value)} className="w-1/3 px-2 py-1.5 bg-slate-900 border border-slate-800 rounded text-xs text-white" />
@@ -405,7 +424,7 @@ export default function ContractWizard({ template, onBack }) {
                   <input type="text" value={partyB.taxId} onChange={(e) => setPartyB({...partyB, taxId: e.target.value})} placeholder="Tax ID / Registration Number" className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white" />
                   
                   <div className="space-y-2 pt-2 border-t border-slate-800">
-                    <p className="text-[11px] font-bold text-slate-300">Custom Custom Fields:</p>
+                    <p className="text-[11px] font-bold text-slate-300">Custom Fields:</p>
                     {partyB.customFields.map((cf, idx) => (
                       <div key={idx} className="flex gap-2 items-center">
                         <input type="text" placeholder="Label" value={cf.label} onChange={(e) => updatePartyCustomField('B', idx, 'label', e.target.value)} className="w-1/3 px-2 py-1.5 bg-slate-900 border border-slate-800 rounded text-xs text-white" />
@@ -469,8 +488,8 @@ export default function ContractWizard({ template, onBack }) {
             </div>
           )}
 
-          {/* TAB 4: LEGAL SETUP WITH SEARCHABLE 102 DISPUTE TYPES & CLAUSE TOGGLES */}
-          {activeTab === 'legal' && (
+          {/* TAB 4: LEGAL SETUP (Only rendered if requiresLegalSetup is true) */}
+          {activeTab === 'legal' && requiresLegalSetup && (
             <div className="space-y-4">
               <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center"><Scale className="h-4 w-4 mr-1.5" /> Legal Setup & Dispute Search</h3>
               
@@ -554,7 +573,7 @@ export default function ContractWizard({ template, onBack }) {
             </div>
           )}
 
-          {/* TAB 5: WATERMARK */}
+          {/* TAB: WATERMARK */}
           {activeTab === 'watermark' && (
             <div className="space-y-4">
               <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center"><Stamp className="h-4 w-4 mr-1.5" /> Document Watermark</h3>
@@ -575,7 +594,7 @@ export default function ContractWizard({ template, onBack }) {
             </div>
           )}
 
-          {/* TAB 6: COLOR PALETTE THEMES */}
+          {/* TAB: COLORS */}
           {activeTab === 'colors' && (
             <div className="space-y-4">
               <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center"><Palette className="h-4 w-4 mr-1.5" /> 50+ Professional Color Palettes</h3>
@@ -620,7 +639,9 @@ export default function ContractWizard({ template, onBack }) {
                 {partyA.logo ? <img src={partyA.logo} alt="Logo A" className="h-12 object-contain" /> : <div className="text-[9px] font-sans font-bold text-slate-400 border border-dashed border-slate-300 p-2 text-center rounded bg-slate-50">[Company Logo]</div>}
               </div>
               <div className="text-center font-sans px-4">
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Binding Master Agreement</h4>
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  {requiresLegalSetup ? 'Binding Master Agreement' : 'Document Statement'}
+                </h4>
                 <p className="text-sm font-extrabold mt-0.5">{agreementTitle}</p>
               </div>
               <div className="w-32 text-right">
@@ -631,7 +652,7 @@ export default function ContractWizard({ template, onBack }) {
             {/* Intro Paragraph */}
             <div className="text-xs font-sans leading-relaxed space-y-4">
               <p>
-                This <strong>{agreementTitle}</strong> ("Agreement") is entered into and made effective as of <strong>{effectiveDate}</strong>, with a validity duration of <strong>{validityPeriod}</strong>, by and between the following authorized entities:
+                This <strong>{agreementTitle}</strong> is entered into and made effective as of <strong>{effectiveDate}</strong>, with a validity duration of <strong>{validityPeriod}</strong>, by and between the following authorized entities:
               </p>
 
               {/* Parties Box with Custom User Added Lines */}
@@ -681,50 +702,52 @@ export default function ContractWizard({ template, onBack }) {
                 </ol>
               </div>
 
-              {/* Legal Setup & Selected Clauses / Dispute Resolution */}
-              <div className="space-y-3 pt-2">
-                <h5 className="font-bold text-xs mb-1">3. Legal Governance & Dispute Resolution</h5>
-                
-                {includeGoverningLawClause && (
-                  <p className="text-slate-700">
-                    <strong>Governing Law:</strong> This Agreement shall be interpreted, construed, and governed in accordance with the laws of <strong>{governingLaw}</strong>.
-                  </p>
-                )}
+              {/* Legal Setup Section rendered conditionally if requiresLegalSetup is true */}
+              {requiresLegalSetup && (
+                <div className="space-y-3 pt-2">
+                  <h5 className="font-bold text-xs mb-1">3. Legal Governance & Dispute Resolution</h5>
+                  
+                  {includeGoverningLawClause && (
+                    <p className="text-slate-700">
+                      <strong>Governing Law:</strong> This Agreement shall be interpreted, construed, and governed in accordance with the laws of <strong>{governingLaw}</strong>.
+                    </p>
+                  )}
 
-                <p className="text-slate-700">
-                  <strong>Dispute Resolution Method:</strong> Any dispute arising from this contract shall be resolved via <strong>{disputeResolution}</strong> in accordance with applicable rules.
-                </p>
-
-                {includeSeverabilityClause && (
                   <p className="text-slate-700">
-                    <strong>Severability:</strong> If any provision of this Agreement is held invalid, the remainder shall continue in full force and effect.
+                    <strong>Dispute Resolution Method:</strong> Any dispute arising from this contract shall be resolved via <strong>{disputeResolution}</strong> in accordance with applicable rules.
                   </p>
-                )}
 
-                {includeEntireAgreementClause && (
-                  <p className="text-slate-700">
-                    <strong>Entire Agreement:</strong> This document constitutes the entire agreement between the parties and supersedes all prior discussions.
-                  </p>
-                )}
+                  {includeSeverabilityClause && (
+                    <p className="text-slate-700">
+                      <strong>Severability:</strong> If any provision of this Agreement is held invalid, the remainder shall continue in full force and effect.
+                    </p>
+                  )}
 
-                {includeConfidentialityClause && (
-                  <p className="text-slate-700">
-                    <strong>Confidentiality:</strong> Both parties agree to protect proprietary data and not disclose confidential information to third parties without prior written consent.
-                  </p>
-                )}
+                  {includeEntireAgreementClause && (
+                    <p className="text-slate-700">
+                      <strong>Entire Agreement:</strong> This document constitutes the entire agreement between the parties and supersedes all prior discussions.
+                    </p>
+                  )}
 
-                {includeLimitationOfLiability && (
-                  <p className="text-slate-700">
-                    <strong>Limitation of Liability:</strong> Neither party shall be liable for indirect, incidental, or consequential damages arising out of this agreement.
-                  </p>
-                )}
+                  {includeConfidentialityClause && (
+                    <p className="text-slate-700">
+                      <strong>Confidentiality:</strong> Both parties agree to protect proprietary data and not disclose confidential information to third parties without prior written consent.
+                    </p>
+                  )}
 
-                {includeForceMajeure && (
-                  <p className="text-slate-700">
-                    <strong>Force Majeure:</strong> Neither party shall be liable for failure to perform due to acts beyond reasonable control (e.g., natural disasters, war, strikes).
-                  </p>
-                )}
-              </div>
+                  {includeLimitationOfLiability && (
+                    <p className="text-slate-700">
+                      <strong>Limitation of Liability:</strong> Neither party shall be liable for indirect, incidental, or consequential damages arising out of this agreement.
+                    </p>
+                  )}
+
+                  {includeForceMajeure && (
+                    <p className="text-slate-700">
+                      <strong>Force Majeure:</strong> Neither party shall be liable for failure to perform due to acts beyond reasonable control (e.g., natural disasters, war, strikes).
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Execution Signatures & Stamp Blocks */}
@@ -737,7 +760,7 @@ export default function ContractWizard({ template, onBack }) {
                       <span className="text-[10px] text-slate-400 italic">Authorized Signature & Date</span>
                     </div>
                   </div>
-                  {includeSealArea && (
+                  {requiresLegalSetup && includeSealArea && (
                     <div className="w-28 h-28 border border-dashed border-slate-400 rounded-full flex flex-col items-center justify-center text-center p-2 text-slate-400 text-[9px]">
                       <Stamp className="h-5 w-5 mb-1 text-slate-300" />
                       <span>[ Company Stamp / Seal ]</span>
@@ -752,7 +775,7 @@ export default function ContractWizard({ template, onBack }) {
                       <span className="text-[10px] text-slate-400 italic">Authorized Signature & Date</span>
                     </div>
                   </div>
-                  {includeSealArea && (
+                  {requiresLegalSetup && includeSealArea && (
                     <div className="w-28 h-28 border border-dashed border-slate-400 rounded-full flex flex-col items-center justify-center text-center p-2 text-slate-400 text-[9px]">
                       <Stamp className="h-5 w-5 mb-1 text-slate-300" />
                       <span>[ Partner Seal ]</span>
@@ -761,7 +784,7 @@ export default function ContractWizard({ template, onBack }) {
                 </div>
               </div>
 
-              {includeNotary && (
+              {requiresLegalSetup && includeNotary && (
                 <div className="pt-4 border-t border-dashed border-slate-300 grid grid-cols-2 gap-10 text-[11px]">
                   <div>
                     <p className="font-semibold text-slate-700">Witness 1:</p>
