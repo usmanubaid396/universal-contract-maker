@@ -134,10 +134,11 @@ function HomeView() {
 
   return (
     <div className="space-y-12">
+      {/* Hero Section */}
       <div className="text-center max-w-3xl mx-auto space-y-6">
         <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold tracking-wide">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>100 SEO-Optimized Legal Agreement Templates</span>
+          <span>100 Professional Legal Agreement Templates</span>
         </div>
         
         <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.1]">
@@ -145,9 +146,10 @@ function HomeView() {
         </h1>
         
         <p className="text-slate-400 text-lg sm:text-xl font-normal leading-relaxed">
-          Each template has its own unique SEO URL. Search keywords, customize clauses, add your brand logos, and export instantly.
+          Search via keywords or browse categories, customize clauses, add your brand logos, and generate export-ready agreements instantly.
         </p>
 
+        {/* Search Bar */}
         <div className="pt-4">
           <div className="relative max-w-2xl mx-auto shadow-2xl rounded-2xl group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl blur opacity-30 group-hover:opacity-75 transition duration-300 pointer-events-none" />
@@ -163,6 +165,7 @@ function HomeView() {
             </div>
           </div>
 
+          {/* Category Filter Pills */}
           <div className="flex flex-wrap items-center justify-center gap-2 mt-6 max-h-40 overflow-y-auto p-1">
             {categories.map((category) => (
               <button
@@ -181,6 +184,7 @@ function HomeView() {
         </div>
       </div>
 
+      {/* Template Grid Section */}
       <div className="space-y-6 pt-6">
         <div className="flex items-center justify-between border-b border-slate-800 pb-4">
           <h2 className="text-xl font-bold text-white flex items-center">
@@ -218,7 +222,7 @@ function HomeView() {
 
               <div className="pt-6 mt-6 border-t border-slate-800/80 flex items-center justify-between">
                 <span className="text-xs text-slate-400 font-medium flex items-center">
-                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400 mr-1.5" /> Unique SEO URL
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400 mr-1.5" /> Ready to Fill
                 </span>
                 <button className="inline-flex items-center text-sm font-semibold text-blue-400 group-hover:translate-x-1 transition-transform">
                   Build Now <ArrowRight className="w-4 h-4 ml-1.5" />
@@ -252,6 +256,7 @@ export default function App() {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col relative overflow-x-hidden">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-gradient-to-tr from-blue-600/20 to-indigo-600/10 blur-[120px] pointer-events-none rounded-full" />
 
+      {/* Navbar */}
       <header className="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div 
@@ -263,17 +268,18 @@ export default function App() {
             </div>
             <div>
               <span className="font-bold text-lg tracking-tight text-white block leading-none">Universal Contract</span>
-              <span className="text-xs text-blue-400 font-medium tracking-wide">Multi-Page SEO Suite</span>
+              <span className="text-xs text-blue-400 font-medium tracking-wide">Professional Legal Suite</span>
             </div>
           </div>
 
           <div className="hidden sm:flex items-center space-x-6 text-sm text-slate-300">
             <span className="flex items-center"><Zap className="w-4 h-4 text-amber-400 mr-1.5" /> Instant PDF Export</span>
-            <span className="flex items-center"><Lock className="w-4 h-4 text-emerald-400 mr-1.5" /> 100 Unique URLs</span>
+            <span className="flex items-center"><Lock className="w-4 h-4 text-emerald-400 mr-1.5" /> 100% Secure & Private</span>
           </div>
         </div>
       </header>
 
+      {/* Main Routed Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-12 relative z-10">
         <Routes>
           <Route path="/" element={<HomeView />} />
@@ -281,9 +287,10 @@ export default function App() {
         </Routes>
       </main>
 
+      {/* Footer */}
       <footer className="border-t border-slate-800/80 bg-slate-950 py-8 mt-20">
         <div className="max-w-7xl mx-auto px-6 text-center text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} Universal Contract Builder. Professional Multi-Page SEO Legal Suite.</p>
+          <p>© {new Date().getFullYear()} Universal Contract Builder. Professional Legal Document Automation Suite.</p>
         </div>
       </footer>
     </div>
