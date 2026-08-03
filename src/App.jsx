@@ -1,8 +1,8 @@
+'use client';
 import React, { useState, useMemo } from 'react';
-import { Routes, Route, useNavigate, useParams, Link } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import Fuse from 'fuse.js';
-import { Search, FileText, ArrowRight, ShieldCheck, Sparkles, CheckCircle, Scale, Zap, Lock, ChevronLeft, ChevronRight } from 'lucide-react';
-import ContractWizard from './components/ContractWizard';
+import { Search, FileText, ArrowRight, ShieldCheck, Sparkles, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const contractTemplates = [
   { id: 'freelance-services', title: 'Freelance Services Agreement', category: 'Freelance', description: 'Work performed in exchange for a fee.', keywords: ['freelance services', 'fee', 'work performed', 'gigs'] },
@@ -107,12 +107,12 @@ const contractTemplates = [
   { id: 'hobby-group-club', title: 'Hobby-Group or Club Membership Agreement', category: 'Personal', description: 'Membership fees, conduct rules, activities, and removal process.', keywords: ['hobby group', 'club membership', 'society rules', 'association agreement']
 ];
 
-function HomeView() {
+export default function HomeView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const fuse = useMemo(() => {
     return new Fuse(contractTemplates, {
@@ -149,6 +149,7 @@ function HomeView() {
   };
 
   const handleSearchChange = (e) => {
+    searchQuery; // line retained or optimized
     setSearchQuery(e.target.value);
     setCurrentPage(1);
   };
@@ -159,7 +160,7 @@ function HomeView() {
       <div className="text-center max-w-3xl mx-auto space-y-6">
         <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold tracking-wide">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>100 Professional Legal Agreement Templates</span>
+          <span>100+ Free Professional Legal Templates</span>
         </div>
         
         <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.1]">
@@ -167,7 +168,7 @@ function HomeView() {
         </h1>
         
         <p className="text-slate-400 text-lg sm:text-xl font-normal leading-relaxed">
-          The ultimate <strong className="text-slate-200">free contract maker</strong> and <strong className="text-slate-200">free AI contract generator</strong>. Search keywords, customize clauses, add your brand logos, and generate export-ready agreements instantly.
+          The ultimate <strong className="text-slate-200">free contract maker</strong> and <strong className="text-slate-200">free AI contract generator</strong>. Search keywords, customize clauses, add your branding, and export export-ready PDFs instantly.
         </p>
 
         {/* Search Bar */}
@@ -180,7 +181,7 @@ function HomeView() {
                 type="text"
                 value={searchQuery}
                 onChange={handleSearchChange}
-                placeholder="Search keywords e.g., 'personal trainer', 'nda', 'loan'..."
+                placeholder="Search templates e.g., 'freelance contract', 'nda', 'loan agreement'..."
                 className="w-full bg-transparent text-slate-100 placeholder-slate-500 focus:outline-none text-base font-medium"
               />
             </div>
@@ -209,7 +210,7 @@ function HomeView() {
       <div className="space-y-6 pt-6">
         <div className="flex items-center justify-between border-b border-slate-800 pb-4">
           <h2 className="text-xl font-bold text-white flex items-center">
-            <FileText className="w-5 h-5 text-blue-500 mr-2" /> Agreement Library
+            <FileText className="w-5 h-5 text-blue-500 mr-2" /> Free Agreement Library
           </h2>
           <span className="text-xs text-slate-400 font-medium">
             Showing {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, filteredTemplates.length)} of {filteredTemplates.length} templates
@@ -220,7 +221,7 @@ function HomeView() {
           {paginatedTemplates.map((template) => (
             <div
               key={template.id}
-              onClick={() => navigate(`/agreement/${template.id}`)}
+              onClick={() => router.push(`/agreement/${template.id}`)}
               className="group bg-slate-900/90 border border-slate-800 rounded-2xl p-6 hover:border-blue-500/50 hover:bg-slate-900 transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-xl hover:-translate-y-1"
             >
               <div className="space-y-4">
@@ -245,11 +246,11 @@ function HomeView() {
 
               <div className="pt-6 mt-6 border-t border-slate-800/80 flex items-center justify-between">
                 <span className="text-xs text-slate-400 font-medium flex items-center">
-                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400 mr-1.5" /> Ready to Fill
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400 mr-1.5" /> Free & Customizable
                 </span>
-                <button className="inline-flex items-center text-sm font-semibold text-blue-400 group-hover:translate-x-1 transition-transform">
+                <span className="inline-flex items-center text-sm font-semibold text-blue-400 group-hover:translate-x-1 transition-transform">
                   Build Now <ArrowRight className="w-4 h-4 ml-1.5" />
-                </button>
+                </span>
               </div>
             </div>
           ))}
@@ -292,134 +293,6 @@ function HomeView() {
           </div>
         )}
       </div>
-
-      {/* SEO Keyword Rich Content Section */}
-      <section className="bg-slate-900/50 border border-slate-800/80 rounded-3xl p-8 sm:p-12 mt-16 space-y-6 text-slate-400 text-sm leading-relaxed">
-        <h2 className="text-2xl font-bold text-white tracking-tight">
-          Why Choose Our Free Contract Generator & AI Agreement Maker?
-        </h2>
-        <p>
-          Whether you are looking for a reliable <strong className="text-slate-200">free contract generator</strong>, a professional <strong className="text-slate-200">free agreement maker</strong>, or an intuitive <strong className="text-slate-200">free contract maker</strong>, our platform provides everything you need. As an advanced <strong className="text-slate-200">free agreement maker</strong> and <strong className="text-slate-200">free AI contract generator</strong>, we make drafting custom legal documents fast and accessible.
-        </p>
-        <p>
-          Utilize our <strong className="text-slate-200">free AI agreement maker</strong>, <strong className="text-slate-200">free ai contract maker</strong>, and <strong className="text-slate-200">free ai agreement maker</strong> suite to effortlessly draft custom NDAs, freelance agreements, sales contracts, and business terms completely free.
-        </p>
-      </section>
-    </div>
-  );
-}
-
-function WizardWrapper() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const template = contractTemplates.find(t => t.id === id) || contractTemplates[0];
-
-  return (
-    <ContractWizard 
-      template={template} 
-      onBack={() => navigate('/')} 
-    />
-  );
-}
-
-function PrivacyPolicyView() {
-  return (
-    <div className="max-w-4xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-12 space-y-8 text-slate-300">
-      <div className="border-b border-slate-800 pb-6">
-        <h1 className="text-3xl font-extrabold text-white">Privacy Policy</h1>
-        <p className="text-xs text-slate-500 mt-1">Last Updated: August 3, 2026</p>
-      </div>
-      <div className="space-y-4 text-sm leading-relaxed">
-        <p>Universal Contract Generator Pro respects your privacy. This Privacy Policy explains how we collect, use, and protect your information when you use our web application and services.</p>
-        <h2 className="text-lg font-bold text-white pt-2">1. Information We Collect</h2>
-        <p>Data inputted into our document wizard, including company names, representative details, addresses, custom clauses, tax IDs, and uploaded brand logos. Certain draft configurations and templates are temporarily stored locally in your browser via localStorage.</p>
-        <h2 className="text-lg font-bold text-white pt-2">2. How We Use Your Information</h2>
-        <p>We use your information to render, generate, and export your customized agreements and PDFs, maintain and secure our software performance, and fulfill technical support requests.</p>
-        <h2 className="text-lg font-bold text-white pt-2">3. Security</h2>
-        <p>Most document generation tasks and rendering processes happen directly within your browser environment. We implement robust security protocols to protect data in transit and at rest.</p>
-      </div>
-    </div>
-  );
-}
-
-function TermsOfServiceView() {
-  return (
-    <div className="max-w-4xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-12 space-y-8 text-slate-300">
-      <div className="border-b border-slate-800 pb-6">
-        <h1 className="text-3xl font-extrabold text-white">Terms of Service</h1>
-        <p className="text-xs text-slate-500 mt-1">Last Updated: August 3, 2026</p>
-      </div>
-      <div className="space-y-4 text-sm leading-relaxed">
-        <p>Welcome to Universal Contract Generator Pro. By accessing or using our website, application, and document generation tools, you agree to be bound by these Terms of Service.</p>
-        
-        <h2 className="text-lg font-bold text-white pt-2">1. Nature of Service & Not Legal Advice</h2>
-        <p>Universal Contract Generator Pro is a technology platform providing document drafting software and templates. <strong>We are NOT a law firm</strong>, legal counsel, or a substitute for an attorney or law firm.</p>
-        <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-2xl text-amber-200">
-          <strong>Mandatory Legal Review Disclaimer:</strong> WE MAKE NO WARRANTY, REPRESENTATION, OR GUARANTEE AS TO THE LEGAL SUFFICIENCY, ACCURACY, COMPLETENESS, ENFORCEABILITY, OR VALIDITY OF ANY DOCUMENT GENERATED THROUGH THIS PLATFORM. You are solely responsible for reviewing, editing, and validating all documents with a qualified, licensed attorney in your relevant jurisdiction before execution or use.
-        </div>
-
-        <h2 className="text-lg font-bold text-white pt-2">2. Limitation of Liability</h2>
-        <p>To the maximum extent permitted by applicable law, Universal Contract Generator Pro shall not be liable for any direct, indirect, incidental, special, consequential, or punitive damages arising out of or in any way connected with your use of the platform or generated templates.</p>
-      </div>
-    </div>
-  );
-}
-
-export default function App() {
-  const navigate = useNavigate();
-
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col relative overflow-x-hidden">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-gradient-to-tr from-blue-600/20 to-indigo-600/10 blur-[120px] pointer-events-none rounded-full" />
-
-      {/* Navbar */}
-      <header className="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div 
-            className="flex items-center space-x-3 cursor-pointer group"
-            onClick={() => navigate('/')}
-          >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:scale-105 transition-transform">
-              <Scale className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <span className="font-bold text-lg tracking-tight text-white block leading-none">Universal Contract</span>
-              <span className="text-xs text-blue-400 font-medium tracking-wide">Professional Legal Suite</span>
-            </div>
-          </div>
-
-          <div className="hidden sm:flex items-center space-x-6 text-sm text-slate-300">
-            <span className="flex items-center"><Zap className="w-4 h-4 text-amber-400 mr-1.5" /> Instant PDF Export</span>
-            <span className="flex items-center"><Lock className="w-4 h-4 text-emerald-400 mr-1.5" /> 100% Secure & Private</span>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Routed Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-12 relative z-10">
-        <Routes>
-          <Route path="/" element={<HomeView />} />
-          <Route path="/agreement/:id" element={<WizardWrapper />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicyView />} />
-          <Route path="/terms-of-service" element={<TermsOfServiceView />} />
-        </Routes>
-      </main>
-
-      {/* Footer with SEO-friendly external page links */}
-      <footer className="border-t border-slate-800/80 bg-slate-950 py-8 mt-20">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 space-y-4 sm:space-y-0">
-          <p>© {new Date().getFullYear()} Universal Contract Builder. Professional Legal Document Automation Suite.</p>
-          <div className="flex items-center space-x-6 font-medium text-slate-400">
-            <Link to="/privacy-policy" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition">
-              Privacy Policy
-            </Link>
-            <span className="text-slate-700">•</span>
-            <Link to="/terms-of-service" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition">
-              Terms & Conditions
-            </Link>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
