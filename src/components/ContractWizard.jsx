@@ -110,15 +110,20 @@ export default function ContractWizard({ template, onBack }) {
     }
   };
 
-  // Direct Browser PDF Export Function (No Print Dialog, No URLs/Timestamps)
+  // High-Definition PDF Export configuration
   const handleDownloadPDF = () => {
     setIsDownloading(true);
     const element = document.getElementById('printable-agreement');
     const options = {
       margin: 10,
       filename: `${template.id}-agreement.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
+      image: { type: 'png', quality: 1.0 },
+      html2canvas: { 
+        scale: 3, // High-resolution rendering to eliminate blurriness
+        useCORS: true, 
+        letterRendering: true,
+        logging: false 
+      },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
@@ -390,13 +395,13 @@ export default function ContractWizard({ template, onBack }) {
                 disabled={isDownloading}
                 className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center shadow-lg shadow-emerald-600/25 ml-auto disabled:opacity-50"
               >
-                <Download className="h-4 w-4 mr-2" /> {isDownloading ? 'Generating PDF...' : 'Download PDF Document'}
+                <Download className="h-4 w-4 mr-2" /> {isDownloading ? 'Generating HD PDF...' : 'Download PDF Document'}
               </button>
             )}
           </div>
         </div>
 
-        {/* Clean Printable Document Preview Area */}
+        {/* High-Definition Printable Document Preview Area */}
         <div id="printable-agreement" className="lg:col-span-7 bg-white text-slate-900 rounded-3xl p-10 shadow-2xl font-serif relative border border-slate-200">
           <div>
             <div className="flex justify-between items-center border-b border-slate-200 pb-8 mb-8 mt-2">
