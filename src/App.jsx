@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import Fuse from 'fuse.js';
-import { Search, FileText, ArrowRight, Shield, Briefcase, Users, Home, CheckCircle2 } from 'lucide-react';
+import { Search, FileText, ArrowRight, Shield } from 'lucide-react';
+import ContractWizard from './components/ContractWizard';
 
 // Sample database of contracts with rich keyword tags for fuzzy/random searches
 const contractTemplates = [
@@ -174,23 +175,11 @@ export default function App() {
             )}
           </>
         ) : (
-          /* Contract Builder Wizard Placeholder */
-          <div className="max-w-2xl mx-auto bg-slate-800/60 border border-slate-700 rounded-2xl p-8 shadow-2xl">
-            <button
-              onClick={() => setSelectedContract(null)}
-              className="text-sm text-blue-400 hover:underline mb-6 inline-block font-medium"
-            >
-              &larr; Back to all templates
-            </button>
-            <h2 className="text-2xl font-bold text-white mb-2">Configuring: {selectedContract.title}</h2>
-            <p className="text-slate-400 mb-6">{selectedContract.description}</p>
-            
-            <div className="border border-dashed border-slate-700 rounded-xl p-8 text-center bg-slate-900/50">
-              <CheckCircle2 className="h-12 w-12 text-blue-500 mx-auto mb-3" />
-              <h3 className="font-semibold text-lg text-white mb-1">Wizard Step 1 Ready</h3>
-              <p className="text-slate-400 text-sm">Next, we will add Party A & Party B logos, custom clauses, and PDF export features here.</p>
-            </div>
-          </div>
+          /* Active Contract Wizard */
+          <ContractWizard 
+            template={selectedContract} 
+            onBack={() => setSelectedContract(null)} 
+          />
         )}
       </main>
     </div>
