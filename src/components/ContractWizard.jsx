@@ -62,7 +62,7 @@ export default function ContractWizard({ template, onBack }) {
 
   const requiresLegalSetup = !isCasualOrNonLegalTemplate;
 
-  // Contract Metadata & Body
+  // Contract Metadata & Body (Fully editable contract body text area)
   const [agreementTitle, setAgreementTitle] = useState(template.title);
   const [effectiveDate, setEffectiveDate] = useState(new Date().toISOString().split('T')[0]);
   const [validityPeriod, setValidityPeriod] = useState('1 Year');
@@ -115,7 +115,7 @@ export default function ContractWizard({ template, onBack }) {
     type.toLowerCase().includes(disputeSearchQuery.toLowerCase())
   );
 
-  // Checkboxes for Clauses and Blocks (Default set to false so user selects what they want)
+  // Checkboxes for Clauses and Blocks (Default set to false)
   const [includeGoverningLawClause, setIncludeGoverningLawClause] = useState(false);
   const [includeSeverabilityClause, setIncludeSeverabilityClause] = useState(false);
   const [includeEntireAgreementClause, setIncludeEntireAgreementClause] = useState(false);
@@ -189,7 +189,7 @@ export default function ContractWizard({ template, onBack }) {
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem(`pro_conditional_custom_legal_${template.id}`);
+    const saved = localStorage.getItem(`pro_editable_body_${template.id}`);
     if (saved) {
       try {
         const data = JSON.parse(saved);
@@ -226,7 +226,7 @@ export default function ContractWizard({ template, onBack }) {
       includeConfidentialityClause, includeLimitationOfLiability, includeForceMajeure,
       includeNotary, includeSealArea
     };
-    localStorage.setItem(`pro_conditional_custom_legal_${template.id}`, JSON.stringify(draftData));
+    localStorage.setItem(`pro_editable_body_${template.id}`, JSON.stringify(draftData));
     setSaveStatus('Draft Saved Successfully!');
     setTimeout(() => setSaveStatus(''), 3000);
   };
@@ -308,9 +308,7 @@ export default function ContractWizard({ template, onBack }) {
         <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-6">
           <div className="border-b border-slate-800 pb-4">
             <h2 className="text-lg font-bold text-white">Document Generator Pro</h2>
-            <p className="text-xs text-slate-400">
-              {requiresLegalSetup ? 'Commercial/Legal Agreement Mode: Customize clauses & dispute methods below.' : 'Standard Document Mode: Legal options omitted for non-legal template type.'}
-            </p>
+            <p className="text-xs text-slate-400">Edit your full contract text directly below.</p>
           </div>
 
           {/* Navigation Tabs */}
@@ -443,10 +441,10 @@ export default function ContractWizard({ template, onBack }) {
             </div>
           )}
 
-          {/* TAB 3: TEXT & CLAUSES */}
+          {/* TAB 3: TEXT & FULLY EDITABLE CONTRACT BODY */}
           {activeTab === 'text' && (
             <div className="space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center"><FileText className="h-4 w-4 mr-1.5" /> Text & Clauses</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center"><FileText className="h-4 w-4 mr-1.5" /> Full Contract Body Text Editor</h3>
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1">Agreement Title</label>
                 <input type="text" value={agreementTitle} onChange={(e) => setAgreementTitle(e.target.value)} className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
@@ -461,30 +459,24 @@ export default function ContractWizard({ template, onBack }) {
                   <input type="text" value={validityPeriod} onChange={(e) => setValidityPeriod(e.target.value)} className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
                 </div>
               </div>
+
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">Main Scope</label>
-                <textarea rows={3} value={contractBody} onChange={(e) => setContractBody(e.target.value)} className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+                <label className="block text-xs font-medium text-slate-400 mb-1">Edit Full Contract Body Text (Scope, Terms & Paragraphs)</label>
+                <textarea 
+                  rows={8} 
+                  value={contractBody} 
+                  onChange={(e) => setContractBody(e.target.value)} 
+                  placeholder="Type or paste your complete contract body text here..."
+                  className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white leading-relaxed focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                />
+                <p className="text-[10px] text-slate-400 mt-1">You can write multiple paragraphs or full terms directly here; it will instantly update in the document preview.</p>
               </div>
+
               <div className="bg-gradient-to-r from-blue-950/40 to-indigo-950/40 border border-blue-500/30 p-3 rounded-xl space-y-2">
-                <label className="block text-xs font-bold text-blue-400 flex items-center"><Sparkles className="h-3.5 w-3.5 mr-1 text-amber-400" /> AI Clause Writer</label>
+                <label className="block text-xs font-bold text-blue-400 flex items-center"><Sparkles className="h-3.5 w-3.5 mr-1 text-amber-400" /> AI Clause Assistant</label>
                 <div className="flex gap-2">
                   <input type="text" placeholder="e.g. advance deposit..." value={aiPrompt} onChange={(e) => setAiPrompt(e.target.value)} className="flex-1 px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white" />
                   <button onClick={handleAIGenerateClause} disabled={isGeneratingAI} className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold">Add</button>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-xs font-medium text-slate-400">Custom Clauses</label>
-                <div className="space-y-2 max-h-32 overflow-y-auto">
-                  {customClauses.map((clause, idx) => (
-                    <div key={idx} className="flex items-center justify-between bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs">
-                      <span className="text-slate-300 pr-2"><strong>{idx + 1}.</strong> {clause}</span>
-                      <button onClick={() => removeClause(idx)} className="text-red-400"><Trash2 className="h-3.5 w-3.5" /></button>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex gap-2 pt-1">
-                  <input type="text" placeholder="Add clause..." value={newClause} onChange={(e) => setNewClause(e.target.value)} className="flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
-                  <button onClick={addClause} className="px-3 py-2 bg-slate-800 text-white rounded-xl text-xs font-bold"><Plus className="h-3.5 w-3.5" /></button>
                 </div>
               </div>
             </div>
@@ -531,7 +523,7 @@ export default function ContractWizard({ template, onBack }) {
                 <p className="text-[11px] text-slate-400 pt-1">Selected: <strong className="text-amber-400">{disputeResolution}</strong></p>
               </div>
 
-              {/* SELECTABLE CLAUSES (Unchecked by default so user customizes) */}
+              {/* SELECTABLE CLAUSES */}
               <div className="space-y-2.5 pt-2 border-t border-slate-800">
                 <p className="text-xs font-bold text-slate-300">Select Standard Legal Clauses to Include:</p>
                 <label className="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
@@ -560,7 +552,7 @@ export default function ContractWizard({ template, onBack }) {
                 </label>
               </div>
 
-              {/* EXECUTION BLOCKS & STAMP AREAS (Unchecked by default) */}
+              {/* EXECUTION BLOCKS & STAMP AREAS */}
               <div className="space-y-2.5 pt-2 border-t border-slate-800">
                 <p className="text-xs font-bold text-slate-300">Execution Blocks & Stamp Areas:</p>
                 <label className="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
@@ -651,13 +643,13 @@ export default function ContractWizard({ template, onBack }) {
               </div>
             </div>
 
-            {/* Intro Paragraph */}
+            {/* Intro Paragraph & Fully Editable Body Text */}
             <div className="text-xs font-sans leading-relaxed space-y-4">
               <p>
                 This <strong>{agreementTitle}</strong> is entered into and made effective as of <strong>{effectiveDate}</strong>, with a validity duration of <strong>{validityPeriod}</strong>, by and between the following authorized entities:
               </p>
 
-              {/* Parties Box with Custom User Added Lines */}
+              {/* Parties Box */}
               <div className="grid grid-cols-2 gap-4">
                 <div className={`p-3.5 rounded-xl border ${currentColor.border} ${currentColor.accent} space-y-1`}>
                   <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">First Party (Issuer)</p>
@@ -688,15 +680,17 @@ export default function ContractWizard({ template, onBack }) {
                 </div>
               </div>
 
-              {/* Scope */}
+              {/* Fully Editable Contract Body Text Rendered Here */}
               <div>
-                <h5 className="font-bold text-xs mb-1">1. Purpose & Scope</h5>
-                <p className="text-slate-700">{contractBody}</p>
+                <h5 className="font-bold text-xs mb-1">1. Scope & Contract Terms</h5>
+                <div className="text-slate-700 whitespace-pre-line leading-relaxed">
+                  {contractBody || '[Enter your full contract text in the Text tab]'}
+                </div>
               </div>
 
-              {/* Clauses */}
+              {/* Custom Clauses */}
               <div>
-                <h5 className="font-bold text-xs mb-1.5">2. Terms, Conditions & Clauses</h5>
+                <h5 className="font-bold text-xs mb-1.5">2. Additional Terms & Conditions</h5>
                 <ol className="list-decimal pl-4 space-y-1.5 text-slate-700">
                   {customClauses.map((clause, idx) => (
                     <li key={idx} className="pl-1">{clause}</li>
@@ -704,7 +698,7 @@ export default function ContractWizard({ template, onBack }) {
                 </ol>
               </div>
 
-              {/* Legal Setup Section (Only renders selected clauses based on user checkboxes) */}
+              {/* Legal Setup Section (Renders only checked options) */}
               {requiresLegalSetup && (
                 <div className="space-y-3 pt-2">
                   <h5 className="font-bold text-xs mb-1">3. Legal Governance & Dispute Resolution</h5>
@@ -752,7 +746,7 @@ export default function ContractWizard({ template, onBack }) {
               )}
             </div>
 
-            {/* Execution Signatures & Stamp Blocks (Rendered conditionally based on user selection) */}
+            {/* Execution Signatures & Stamp Blocks */}
             <div className={`pt-8 border-t ${currentColor.border} font-sans text-xs space-y-8`}>
               <div className="grid grid-cols-2 gap-10">
                 <div className="space-y-8">
