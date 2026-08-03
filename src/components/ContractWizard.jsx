@@ -47,7 +47,6 @@ export default function ContractWizard({ template, onBack }) {
   };
 
   // Check if current agreement template actually requires legal setup & dispute options
-  // (e.g. strict business, commercial, employment, vendor, service, financial contracts)
   const templateTitleLower = (template.title || '').toLowerCase();
   const templateDescLower = (template.description || '').toLowerCase();
   
@@ -78,7 +77,7 @@ export default function ContractWizard({ template, onBack }) {
   const [aiPrompt, setAiPrompt] = useState('');
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
-  // Legal Setup & Dispute Options (Only for eligible templates)
+  // Legal Setup & Dispute Options (Default unchecked so users customize)
   const [governingLaw, setGoverningLaw] = useState('Pakistan');
   const [disputeResolution, setDisputeResolution] = useState('Binding Arbitration');
   const [disputeSearchQuery, setDisputeSearchQuery] = useState('');
@@ -116,15 +115,15 @@ export default function ContractWizard({ template, onBack }) {
     type.toLowerCase().includes(disputeSearchQuery.toLowerCase())
   );
 
-  // Checkboxes for Clauses and Blocks
-  const [includeGoverningLawClause, setIncludeGoverningLawClause] = useState(true);
-  const [includeSeverabilityClause, setIncludeSeverabilityClause] = useState(true);
-  const [includeEntireAgreementClause, setIncludeEntireAgreementClause] = useState(true);
-  const [includeConfidentialityClause, setIncludeConfidentialityClause] = useState(true);
-  const [includeLimitationOfLiability, setIncludeLimitationOfLiability] = useState(true);
-  const [includeForceMajeure, setIncludeForceMajeure] = useState(true);
-  const [includeNotary, setIncludeNotary] = useState(true);
-  const [includeSealArea, setIncludeSealArea] = useState(true);
+  // Checkboxes for Clauses and Blocks (Default set to false so user selects what they want)
+  const [includeGoverningLawClause, setIncludeGoverningLawClause] = useState(false);
+  const [includeSeverabilityClause, setIncludeSeverabilityClause] = useState(false);
+  const [includeEntireAgreementClause, setIncludeEntireAgreementClause] = useState(false);
+  const [includeConfidentialityClause, setIncludeConfidentialityClause] = useState(false);
+  const [includeLimitationOfLiability, setIncludeLimitationOfLiability] = useState(false);
+  const [includeForceMajeure, setIncludeForceMajeure] = useState(false);
+  const [includeNotary, setIncludeNotary] = useState(false);
+  const [includeSealArea, setIncludeSealArea] = useState(false);
 
   // Watermark
   const [watermark, setWatermark] = useState('None (Clean)');
@@ -190,7 +189,7 @@ export default function ContractWizard({ template, onBack }) {
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem(`pro_conditional_legal_${template.id}`);
+    const saved = localStorage.getItem(`pro_conditional_custom_legal_${template.id}`);
     if (saved) {
       try {
         const data = JSON.parse(saved);
@@ -211,6 +210,8 @@ export default function ContractWizard({ template, onBack }) {
         if (data.includeConfidentialityClause !== undefined) setIncludeConfidentialityClause(data.includeConfidentialityClause);
         if (data.includeLimitationOfLiability !== undefined) setIncludeLimitationOfLiability(data.includeLimitationOfLiability);
         if (data.includeForceMajeure !== undefined) setIncludeForceMajeure(data.includeForceMajeure);
+        if (data.includeNotary !== undefined) setIncludeNotary(data.includeNotary);
+        if (data.includeSealArea !== undefined) setIncludeSealArea(data.includeSealArea);
       } catch (e) {
         console.error('Failed to load draft');
       }
@@ -222,9 +223,10 @@ export default function ContractWizard({ template, onBack }) {
       partyA, partyB, agreementTitle, effectiveDate, validityPeriod, contractBody, 
       customClauses, governingLaw, disputeResolution, watermark, selectedColorTheme,
       includeGoverningLawClause, includeSeverabilityClause, includeEntireAgreementClause,
-      includeConfidentialityClause, includeLimitationOfLiability, includeForceMajeure 
+      includeConfidentialityClause, includeLimitationOfLiability, includeForceMajeure,
+      includeNotary, includeSealArea
     };
-    localStorage.setItem(`pro_conditional_legal_${template.id}`, JSON.stringify(draftData));
+    localStorage.setItem(`pro_conditional_custom_legal_${template.id}`, JSON.stringify(draftData));
     setSaveStatus('Draft Saved Successfully!');
     setTimeout(() => setSaveStatus(''), 3000);
   };
@@ -307,11 +309,11 @@ export default function ContractWizard({ template, onBack }) {
           <div className="border-b border-slate-800 pb-4">
             <h2 className="text-lg font-bold text-white">Document Generator Pro</h2>
             <p className="text-xs text-slate-400">
-              {requiresLegalSetup ? 'Commercial/Legal Agreement Mode: Includes Dispute & Jurisdiction controls.' : 'Standard Document Mode: Legal options omitted for non-legal template type.'}
+              {requiresLegalSetup ? 'Commercial/Legal Agreement Mode: Customize clauses & dispute methods below.' : 'Standard Document Mode: Legal options omitted for non-legal template type.'}
             </p>
           </div>
 
-          {/* Navigation Tabs (Conditional Legal tab) */}
+          {/* Navigation Tabs */}
           <div className={`grid ${requiresLegalSetup ? 'grid-cols-3' : 'grid-cols-2'} gap-1.5 bg-slate-950 p-1.5 rounded-2xl border border-slate-800`}>
             {[
               { id: 'partyA', label: 'Party A' },
@@ -529,7 +531,7 @@ export default function ContractWizard({ template, onBack }) {
                 <p className="text-[11px] text-slate-400 pt-1">Selected: <strong className="text-amber-400">{disputeResolution}</strong></p>
               </div>
 
-              {/* SELECTABLE BLUE TICK CLAUSES */}
+              {/* SELECTABLE CLAUSES (Unchecked by default so user customizes) */}
               <div className="space-y-2.5 pt-2 border-t border-slate-800">
                 <p className="text-xs font-bold text-slate-300">Select Standard Legal Clauses to Include:</p>
                 <label className="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
@@ -558,7 +560,7 @@ export default function ContractWizard({ template, onBack }) {
                 </label>
               </div>
 
-              {/* EXECUTION BLOCKS & STAMP AREAS */}
+              {/* EXECUTION BLOCKS & STAMP AREAS (Unchecked by default) */}
               <div className="space-y-2.5 pt-2 border-t border-slate-800">
                 <p className="text-xs font-bold text-slate-300">Execution Blocks & Stamp Areas:</p>
                 <label className="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
@@ -702,7 +704,7 @@ export default function ContractWizard({ template, onBack }) {
                 </ol>
               </div>
 
-              {/* Legal Setup Section rendered conditionally if requiresLegalSetup is true */}
+              {/* Legal Setup Section (Only renders selected clauses based on user checkboxes) */}
               {requiresLegalSetup && (
                 <div className="space-y-3 pt-2">
                   <h5 className="font-bold text-xs mb-1">3. Legal Governance & Dispute Resolution</h5>
@@ -750,7 +752,7 @@ export default function ContractWizard({ template, onBack }) {
               )}
             </div>
 
-            {/* Execution Signatures & Stamp Blocks */}
+            {/* Execution Signatures & Stamp Blocks (Rendered conditionally based on user selection) */}
             <div className={`pt-8 border-t ${currentColor.border} font-sans text-xs space-y-8`}>
               <div className="grid grid-cols-2 gap-10">
                 <div className="space-y-8">
