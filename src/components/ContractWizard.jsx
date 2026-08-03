@@ -33,45 +33,68 @@ export default function ContractWizard({ template, onBack }) {
   // Watermark
   const [watermark, setWatermark] = useState('None (Clean)');
 
-  // Typography Themes (50+ options)
-  const typographyThemes = [
-    'Corporate Standard', 'Modern Sans', 'Executive Blue', 'Legal Minimalist', 'Crimson Authority',
-    'Classic Serif', 'Clean Helvetica', 'Bold Gothic', 'Traditional Garamond', 'Neo Grotesk',
-    'Verdana Pro', 'Georgia Regal', 'Courier Legal', 'Century Academic', 'Futura Corporate',
-    'Inter UI', 'Roboto Clean', 'Source Sans Pro', 'Playfair Display', 'Merriweather Trust',
-    'Open Sans Professional', 'Lato Enterprise', 'Montserrat Official', 'Raleway Executive', 'Ubuntu Authority',
-    'PT Serif Classic', 'PT Sans Modern', 'Noto Serif Formal', 'Noto Sans Clean', 'Droid Serif Legal',
-    'Arimo Standard', 'Cinzel Authority', 'Baskerville Trust', 'Bodoni Standard', 'Didot Executive',
-    'Garamond Pro', 'Baskerville Traditional', 'Century Gothic Executive', 'Franklin Gothic Standard', 'Consolas Legal',
-    'Tahoma Clean', 'Trebuchet Enterprise', 'Garamond Formal', 'Cambria Official', 'Calibri Corporate',
-    'Palatino Linotype', 'Book Antiqua', 'Lucida Bright', 'Rockwell Standard', 'Constantia Legal'
-  ];
-  const [selectedTypography, setSelectedTypography] = useState('Corporate Standard');
-
-  // Color Palette Themes
+  // 50+ Professional Color Palette Themes
   const colorThemes = {
-    'Classic Slate': { primary: 'text-slate-900', border: 'border-slate-200', accent: 'bg-slate-50', badge: 'bg-slate-900 text-white' },
-    'Executive Navy': { primary: 'text-blue-950', border: 'border-blue-200', accent: 'bg-blue-50/50', badge: 'bg-blue-900 text-white' },
-    'Forest Green': { primary: 'text-emerald-950', border: 'border-emerald-200', accent: 'bg-emerald-50/50', badge: 'bg-emerald-900 text-white' },
-    'Royal Burgundy': { primary: 'text-rose-950', border: 'border-rose-200', accent: 'bg-rose-50/50', badge: 'bg-rose-900 text-white' },
-    'Midnight Charcoal': { primary: 'text-gray-900', border: 'border-gray-300', accent: 'bg-gray-100', badge: 'bg-gray-900 text-white' },
-    'Amber Prestige': { primary: 'text-amber-950', border: 'border-amber-200', accent: 'bg-amber-50/50', badge: 'bg-amber-900 text-white' }
+    'Classic Slate': { primary: 'text-slate-900', border: 'border-slate-200', accent: 'bg-slate-50' },
+    'Executive Navy': { primary: 'text-blue-950', border: 'border-blue-200', accent: 'bg-blue-50/50' },
+    'Forest Green': { primary: 'text-emerald-950', border: 'border-emerald-200', accent: 'bg-emerald-50/50' },
+    'Royal Burgundy': { primary: 'text-rose-950', border: 'border-rose-200', accent: 'bg-rose-50/50' },
+    'Midnight Charcoal': { primary: 'text-gray-900', border: 'border-gray-300', accent: 'bg-gray-100' },
+    'Amber Prestige': { primary: 'text-amber-950', border: 'border-amber-200', accent: 'bg-amber-50/50' },
+    'Sapphire Blue': { primary: 'text-sky-950', border: 'border-sky-200', accent: 'bg-sky-50/50' },
+    'Crimson Authority': { primary: 'text-red-950', border: 'border-red-200', accent: 'bg-red-50/50' },
+    'Deep Indigo': { primary: 'text-indigo-950', border: 'border-indigo-200', accent: 'bg-indigo-50/50' },
+    'Violet Sovereign': { primary: 'text-purple-950', border: 'border-purple-200', accent: 'bg-purple-50/50' },
+    'Teal Executive': { primary: 'text-teal-950', border: 'border-teal-200', accent: 'bg-teal-50/50' },
+    'Cyan Trust': { primary: 'text-cyan-950', border: 'border-cyan-200', accent: 'bg-cyan-50/50' },
+    'Olive Professional': { primary: 'text-lime-950', border: 'border-lime-200', accent: 'bg-lime-50/50' },
+    'Bronze Enterprise': { primary: 'text-orange-950', border: 'border-orange-200', accent: 'bg-orange-50/50' },
+    'Zinc Minimalist': { primary: 'text-zinc-900', border: 'border-zinc-200', accent: 'bg-zinc-50' },
+    'Stone Neutral': { primary: 'text-stone-900', border: 'border-stone-200', accent: 'bg-stone-50' },
+    'Neutral Corporate': { primary: 'text-neutral-900', border: 'border-neutral-200', accent: 'bg-neutral-50' },
+    'Fuchsia Royalty': { primary: 'text-fuchsia-950', border: 'border-fuchsia-200', accent: 'bg-fuchsia-50/50' },
+    'Pink Executive': { primary: 'text-pink-950', border: 'border-pink-200', accent: 'bg-pink-50/50' },
+    'Warm Copper': { primary: 'text-yellow-950', border: 'border-yellow-200', accent: 'bg-yellow-50/50' },
+    'Steel Blue': { primary: 'text-blue-900', border: 'border-blue-300', accent: 'bg-blue-50' },
+    'Mint Official': { primary: 'text-emerald-900', border: 'border-emerald-300', accent: 'bg-emerald-50' },
+    'Slate Professional': { primary: 'text-slate-800', border: 'border-slate-300', accent: 'bg-slate-100' },
+    'Navy Formal': { primary: 'text-blue-900', border: 'border-blue-400', accent: 'bg-blue-50/80' },
+    'Charcoal Legal': { primary: 'text-gray-800', border: 'border-gray-400', accent: 'bg-gray-50' },
+    'Green Governance': { primary: 'text-green-950', border: 'border-green-200', accent: 'bg-green-50/50' },
+    'Red Compliance': { primary: 'text-rose-900', border: 'border-rose-300', accent: 'bg-rose-50' },
+    'Purple Protocol': { primary: 'text-purple-900', border: 'border-purple-300', accent: 'bg-purple-50' },
+    'Teal Standard': { primary: 'text-teal-900', border: 'border-teal-300', accent: 'bg-teal-50' },
+    'Orange Enterprise': { primary: 'text-orange-900', border: 'border-orange-300', accent: 'bg-orange-50' },
+    'Sky Corporate': { primary: 'text-sky-900', border: 'border-sky-300', accent: 'bg-sky-50' },
+    'Indigo Master': { primary: 'text-indigo-900', border: 'border-indigo-300', accent: 'bg-indigo-50' },
+    'Emerald Trust': { primary: 'text-emerald-900', border: 'border-emerald-400', accent: 'bg-emerald-50' },
+    'Amber Legal': { primary: 'text-amber-900', border: 'border-amber-300', accent: 'bg-amber-50' },
+    'Rose Governance': { primary: 'text-rose-900', border: 'border-rose-300', accent: 'bg-rose-50' },
+    'Cyan Official': { primary: 'text-cyan-900', border: 'border-cyan-300', accent: 'bg-cyan-50' },
+    'Zinc Corporate': { primary: 'text-zinc-800', border: 'border-zinc-300', accent: 'bg-zinc-100' },
+    'Stone Executive': { primary: 'text-stone-800', border: 'border-stone-300', accent: 'bg-stone-100' },
+    'Neutral Legal': { primary: 'text-neutral-800', border: 'border-neutral-300', accent: 'bg-neutral-100' },
+    'Blue Sovereign': { primary: 'text-blue-950', border: 'border-blue-400', accent: 'bg-blue-100/50' },
+    'Slate Authority': { primary: 'text-slate-950', border: 'border-slate-400', accent: 'bg-slate-100/80' },
+    'Charcoal Enterprise': { primary: 'text-gray-950', border: 'border-gray-400', accent: 'bg-gray-100/80' },
+    'Green Sovereign': { primary: 'text-emerald-950', border: 'border-emerald-400', accent: 'bg-emerald-100/50' },
+    'Burgundy Authority': { primary: 'text-rose-950', border: 'border-rose-400', accent: 'bg-rose-100/50' },
+    'Indigo Sovereign': { primary: 'text-indigo-950', border: 'border-indigo-400', accent: 'bg-indigo-100/50' },
+    'Amber Sovereign': { primary: 'text-amber-950', border: 'border-amber-400', accent: 'bg-amber-100/50' },
+    'Violet Sovereign': { primary: 'text-purple-950', border: 'border-purple-400', accent: 'bg-purple-100/50' },
+    'Teal Sovereign': { primary: 'text-teal-950', border: 'border-teal-400', accent: 'bg-teal-100/50' },
+    'Cyan Sovereign': { primary: 'text-cyan-950', border: 'border-cyan-400', accent: 'bg-cyan-100/50' },
+    'Classic Black': { primary: 'text-black', border: 'border-black', accent: 'bg-gray-50' }
   };
   const [selectedColorTheme, setSelectedColorTheme] = useState('Classic Slate');
 
   const currentColor = colorThemes[selectedColorTheme] || colorThemes['Classic Slate'];
 
-  const getFontClass = (themeName) => {
-    if (themeName.includes('Sans') || themeName.includes('Helvetica') || themeName.includes('Inter') || themeName.includes('Roboto') || themeName.includes('Open Sans') || themeName.includes('Lato') || themeName.includes('Montserrat') || themeName.includes('Raleway') || themeName.includes('Ubuntu') || themeName.includes('Tahoma') || themeName.includes('Trebuchet') || themeName.includes('Calibri') || themeName.includes('Verdana') || themeName.includes('Futura') || themeName.includes('Century Gothic')) return 'font-sans';
-    if (themeName.includes('Mono') || themeName.includes('Courier') || themeName.includes('Consolas')) return 'font-mono';
-    return 'font-serif';
-  };
-
   const [saveStatus, setSaveStatus] = useState('');
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem(`pro_max_ultra_${template.id}`);
+    const saved = localStorage.getItem(`pro_max_50_colors_${template.id}`);
     if (saved) {
       try {
         const data = JSON.parse(saved);
@@ -85,7 +108,6 @@ export default function ContractWizard({ template, onBack }) {
         if (data.governingLaw) setGoverningLaw(data.governingLaw);
         if (data.disputeResolution) setDisputeResolution(data.disputeResolution);
         if (data.watermark) setWatermark(data.watermark);
-        if (data.selectedTypography) setSelectedTypography(data.selectedTypography);
         if (data.selectedColorTheme) setSelectedColorTheme(data.selectedColorTheme);
       } catch (e) {
         console.error('Failed to load draft');
@@ -94,8 +116,8 @@ export default function ContractWizard({ template, onBack }) {
   }, [template.id]);
 
   const saveDraft = () => {
-    const draftData = { partyA, partyB, agreementTitle, effectiveDate, validityPeriod, contractBody, customClauses, governingLaw, disputeResolution, watermark, selectedTypography, selectedColorTheme };
-    localStorage.setItem(`pro_max_ultra_${template.id}`, JSON.stringify(draftData));
+    const draftData = { partyA, partyB, agreementTitle, effectiveDate, validityPeriod, contractBody, customClauses, governingLaw, disputeResolution, watermark, selectedColorTheme };
+    localStorage.setItem(`pro_max_50_colors_${template.id}`, JSON.stringify(draftData));
     setSaveStatus('Draft Saved Successfully!');
     setTimeout(() => setSaveStatus(''), 3000);
   };
@@ -177,24 +199,23 @@ export default function ContractWizard({ template, onBack }) {
         <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-6">
           <div className="border-b border-slate-800 pb-4">
             <h2 className="text-lg font-bold text-white">Document Generator Pro</h2>
-            <p className="text-xs text-slate-400">Configure text themes, color palettes, and clauses.</p>
+            <p className="text-xs text-slate-400">Configure parties, clauses, watermarks, and 50+ color palettes.</p>
           </div>
 
           {/* Navigation Tabs */}
-          <div className="grid grid-cols-4 gap-1.5 bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
+          <div className="grid grid-cols-3 gap-1.5 bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
             {[
               { id: 'partyA', label: 'Party A' },
               { id: 'partyB', label: 'Party B' },
               { id: 'text', label: 'Text' },
               { id: 'legal', label: 'Legal' },
               { id: 'watermark', label: 'Watermark' },
-              { id: 'typography', label: 'Text Themes' },
-              { id: 'colors', label: 'Colors' }
+              { id: 'colors', label: 'Colors (50+)' }
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-2 px-2 rounded-xl text-[11px] font-bold transition-all ${
+                className={`py-2 px-2 rounded-xl text-xs font-bold transition-all ${
                   activeTab === tab.id ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-900'
                 }`}
               >
@@ -380,50 +401,25 @@ export default function ContractWizard({ template, onBack }) {
             </div>
           )}
 
-          {/* TAB 6: TYPOGRAPHY THEMES (50+ options) */}
-          {activeTab === 'typography' && (
-            <div className="space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center"><Palette className="h-4 w-4 mr-1.5" /> Text & Font Themes (50+ Options)</h3>
-              <p className="text-xs text-slate-400">Select a formal typography style for the agreement text.</p>
-              <div className="space-y-2 pt-2 max-h-96 overflow-y-auto pr-1">
-                {typographyThemes.map((themeName) => (
-                  <button
-                    key={themeName}
-                    onClick={() => setSelectedTypography(themeName)}
-                    className={`w-full text-left p-3 rounded-xl border transition-all flex items-center justify-between ${
-                      selectedTypography === themeName ? 'bg-blue-600/10 border-blue-500 text-white shadow-md' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <div>
-                      <p className={`text-xs font-bold text-slate-200 ${getFontClass(themeName)}`}>{themeName}</p>
-                      <p className="text-[10px] text-slate-500 mt-0.5">Sample agreement typography</p>
-                    </div>
-                    <div className={`w-3.5 h-3.5 rounded-full border border-slate-600 ${selectedTypography === themeName ? 'bg-blue-500' : 'bg-slate-800'}`} />
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 7: COLOR THEMES */}
+          {/* TAB 6: 50+ COLOR PALETTE THEMES */}
           {activeTab === 'colors' && (
             <div className="space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center"><Palette className="h-4 w-4 mr-1.5" /> Color Palette Themes</h3>
-              <p className="text-xs text-slate-400">Choose a professional color palette for accents and borders.</p>
-              <div className="space-y-2.5 pt-2">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center"><Palette className="h-4 w-4 mr-1.5" /> 50+ Professional Color Palettes</h3>
+              <p className="text-xs text-slate-400">Choose from 50+ professional executive color palettes.</p>
+              <div className="space-y-2 pt-2 max-h-96 overflow-y-auto pr-1">
                 {Object.keys(colorThemes).map((colorName) => (
                   <button
                     key={colorName}
                     onClick={() => setSelectedColorTheme(colorName)}
-                    className={`w-full text-left p-3.5 rounded-xl border transition-all flex items-center justify-between ${
+                    className={`w-full text-left p-3 rounded-xl border transition-all flex items-center justify-between ${
                       selectedColorTheme === colorName ? 'bg-blue-600/10 border-blue-500 text-white shadow-md' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
                     }`}
                   >
                     <div>
                       <p className="text-xs font-bold text-slate-200">{colorName}</p>
-                      <p className="text-[10px] text-slate-500 mt-0.5">Applies executive border & title tones.</p>
+                      <p className="text-[10px] text-slate-500 mt-0.5">Executive border & title tone</p>
                     </div>
-                    <div className={`w-4 h-4 rounded-full border border-slate-600 ${selectedColorTheme === colorName ? 'bg-blue-500' : 'bg-slate-800'}`} />
+                    <div className={`w-3.5 h-3.5 rounded-full border border-slate-600 ${selectedColorTheme === colorName ? 'bg-blue-500' : 'bg-slate-800'}`} />
                   </button>
                 ))}
               </div>
@@ -432,7 +428,7 @@ export default function ContractWizard({ template, onBack }) {
         </div>
 
         {/* Right Side: Professional Live Legal Document Preview */}
-        <div id="printable-agreement" className={`lg:col-span-7 bg-white rounded-3xl p-10 shadow-2xl relative border ${currentColor.border} ${getFontClass(selectedTypography)} ${currentColor.primary} space-y-6 overflow-hidden`}>
+        <div id="printable-agreement" className={`lg:col-span-7 bg-white rounded-3xl p-10 shadow-2xl relative border ${currentColor.border} font-serif ${currentColor.primary} space-y-6 overflow-hidden`}>
           
           {/* Watermark Overlay */}
           {watermark !== 'None (Clean)' && (
