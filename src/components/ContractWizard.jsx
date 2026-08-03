@@ -466,7 +466,7 @@ export default function ContractWizard({ template, onBack }) {
                 )}
               </div>
               <div>
-                <p className="font-bold text-slate-900">For: {partyB.name || 'Party B (Recipient)'}</p>
+                <p className="font-br text-slate-900 font-bold">For: {partyB.name || 'Party B (Recipient)'}</p>
                 <p className="text-slate-500 text-[11px]">Authorized Signature / Acceptance</p>
               </div>
             </div>
