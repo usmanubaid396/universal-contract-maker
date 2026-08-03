@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Building2, User, Download, Plus, Trash2, Save, Sparkles, Scale, FileText, Stamp, Palette, Search } from 'lucide-react';
+import { ArrowLeft, Building2, User, Download, Plus, Trash2, Save, Sparkles, Scale, FileText, Stamp, Palette, Search, X } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 
 export default function ContractWizard({ template, onBack }) {
@@ -99,7 +99,7 @@ export default function ContractWizard({ template, onBack }) {
   // Section 3 Headings & Editable Legal Clauses
   const [sec3Heading, setSec3Heading] = useState('3. Legal Governance & Dispute Resolution');
   const [governingLaw, setGoverningLaw] = useState('Pakistan');
-  const [disputeResolution, setDisputeResolution] = useState('Binding Arbitration');
+  const [disputeResolution, setDisputeResolution] = useState('Binding Arbitration'); // Can now be cleared (null / empty)
   const [disputeSearchQuery, setDisputeSearchQuery] = useState('');
   
   const disputeTypesList = [
@@ -139,7 +139,7 @@ export default function ContractWizard({ template, onBack }) {
   const [governingLawLabel, setGoverningLawLabel] = useState('Governing Law:');
   const [governingLawText, setGoverningLawText] = useState('This Agreement shall be interpreted, construed, and governed in accordance with the laws of Pakistan.');
   const [disputeLabel, setDisputeLabel] = useState('Dispute Resolution Method');
-  const [disputeClauseText, setDisputeClauseText] = useState('Any dispute arising from this contract shall be resolved via Binding Arbitration in accordance with applicable rules.');
+  const [disputeClauseText, setDisputeClauseText] = useState('Any dispute arising from this contract shall be resolved via the selected method in accordance with applicable rules.');
   const [severabilityLabel, setSeverabilityLabel] = useState('Severability:');
   const [severabilityText, setSeverabilityText] = useState('If any provision of this Agreement is held invalid, the remainder shall continue in full force and effect.');
   const [entireAgreementLabel, setEntireAgreementLabel] = useState('Entire Agreement:');
@@ -225,7 +225,7 @@ export default function ContractWizard({ template, onBack }) {
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem(`pro_ultimate_editable_${template.id}`);
+    const saved = localStorage.getItem(`pro_unselectable_dispute_${template.id}`);
     if (saved) {
       try {
         const data = JSON.parse(saved);
@@ -245,7 +245,7 @@ export default function ContractWizard({ template, onBack }) {
         if (data.customClauses) setCustomClauses(data.customClauses);
         if (data.sec3Heading) setSec3Heading(data.sec3Heading);
         if (data.governingLaw) setGoverningLaw(data.governingLaw);
-        if (data.disputeResolution) setDisputeResolution(data.disputeResolution);
+        if (data.disputeResolution !== undefined) setDisputeResolution(data.disputeResolution);
         if (data.watermark) setWatermark(data.watermark);
         if (data.selectedColorTheme) setSelectedColorTheme(data.selectedColorTheme);
         if (data.includeGoverningLawClause !== undefined) setIncludeGoverningLawClause(data.includeGoverningLawClause);
@@ -288,7 +288,7 @@ export default function ContractWizard({ template, onBack }) {
       severabilityLabel, severabilityText, entireAgreementLabel, entireAgreementText, 
       confidentialityLabel, confidentialityText, liabilityLabel, liabilityText, forceMajeureLabel, forceMajeureText
     };
-    localStorage.setItem(`pro_ultimate_editable_${template.id}`, JSON.stringify(draftData));
+    localStorage.setItem(`pro_unselectable_dispute_${template.id}`, JSON.stringify(draftData));
     setSaveStatus('Draft Saved Successfully!');
     setTimeout(() => setSaveStatus(''), 3000);
   };
@@ -511,13 +511,13 @@ export default function ContractWizard({ template, onBack }) {
             </div>
           )}
 
-          {/* TAB 3: TEXT & HEADINGS (Fully Editable Main Headings, Intro Text & Section Headings) */}
+          {/* TAB 3: TEXT & HEADINGS */}
           {activeTab === 'text' && (
             <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
               <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center"><FileText className="h-4 w-4 mr-1.5" /> Edit All Headings & Text Sections</h3>
               
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">Top Header Label (e.g. BINDING MASTER AGREEMENT)</label>
+                <label className="block text-xs font-medium text-slate-400 mb-1">Top Header Label</label>
                 <input type="text" value={topHeaderLabel} onChange={(e) => setTopHeaderLabel(e.target.value)} className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
               </div>
 
@@ -537,39 +537,14 @@ export default function ContractWizard({ template, onBack }) {
                 </div>
               </div>
 
-              {/* Editable Intro Paragraph Parts */}
-              <div className="space-y-2 bg-slate-950 p-3 rounded-xl border border-slate-800">
-                <label className="block text-xs font-bold text-blue-400">Introductory Paragraph Text</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <span className="text-[10px] text-slate-400">Before Title:</span>
-                    <input type="text" value={introTextBefore} onChange={(e) => setIntroTextBefore(e.target.value)} className="w-full px-2 py-1 bg-slate-900 border border-slate-800 rounded text-xs text-white" />
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-slate-400">Middle Text:</span>
-                    <input type="text" value={introTextMiddle} onChange={(e) => setIntroTextMiddle(e.target.value)} className="w-full px-2 py-1 bg-slate-900 border border-slate-800 rounded text-xs text-white" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  <div>
-                    <span className="text-[10px] text-slate-400">After Date:</span>
-                    <input type="text" value={introTextAfter} onChange={(e) => setIntroTextAfter(e.target.value)} className="w-full px-2 py-1 bg-slate-900 border border-slate-800 rounded text-xs text-white" />
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-slate-400">Ending Text:</span>
-                    <input type="text" value={introTextEnding} onChange={(e) => setIntroTextEnding(e.target.value)} className="w-full px-2 py-1 bg-slate-900 border border-slate-800 rounded text-xs text-white" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Section 1 Heading & Body */}
+              {/* Section 1 */}
               <div className="space-y-2 bg-slate-950 p-3 rounded-xl border border-slate-800">
                 <label className="block text-xs font-bold text-blue-400">Section 1 Heading & Content</label>
                 <input type="text" value={sec1Heading} onChange={(e) => setSec1Heading(e.target.value)} className="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded text-xs text-white font-bold" />
                 <textarea rows={4} value={contractBody} onChange={(e) => setContractBody(e.target.value)} className="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded text-xs text-white leading-relaxed" />
               </div>
 
-              {/* Section 2 Heading & Clauses */}
+              {/* Section 2 */}
               <div className="space-y-2 bg-slate-950 p-3 rounded-xl border border-slate-800">
                 <label className="block text-xs font-bold text-blue-400">Section 2 Heading & Clauses</label>
                 <input type="text" value={sec2Heading} onChange={(e) => setSec2Heading(e.target.value)} className="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded text-xs text-white font-bold" />
@@ -591,10 +566,10 @@ export default function ContractWizard({ template, onBack }) {
             </div>
           )}
 
-          {/* TAB 4: LEGAL SETUP */}
+          {/* TAB 4: LEGAL SETUP (With unselectable dispute option) */}
           {activeTab === 'legal' && requiresLegalSetup && (
             <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center"><Scale className="h-4 w-4 mr-1.5" /> Legal Setup & Fully Editable Section 3</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center"><Scale className="h-4 w-4 mr-1.5" /> Legal Setup & Dispute Search</h3>
               
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1">Section 3 Heading Title</label>
@@ -606,11 +581,21 @@ export default function ContractWizard({ template, onBack }) {
                 <input type="text" value={governingLaw} onChange={(e) => setGoverningLaw(e.target.value)} className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
               </div>
 
-              {/* SEARCHABLE DISPUTE RESOLUTION TYPES (102 Types) */}
+              {/* SEARCHABLE DISPUTE RESOLUTION TYPES WITH UNSELECT BUTTON */}
               <div className="space-y-2 bg-slate-950 p-3 rounded-2xl border border-slate-800">
-                <label className="block text-xs font-bold text-blue-400 flex items-center">
-                  <Search className="h-3.5 w-3.5 mr-1" /> Search & Select Dispute Method (102 types)
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-blue-400 flex items-center">
+                    <Search className="h-3.5 w-3.5 mr-1" /> Search & Select Dispute Method (102 types)
+                  </label>
+                  {disputeResolution && (
+                    <button 
+                      onClick={() => setDisputeResolution('')} 
+                      className="text-[11px] text-red-400 hover:text-red-300 flex items-center bg-red-950/40 px-2 py-0.5 rounded border border-red-500/30"
+                    >
+                      <X className="h-3 w-3 mr-1" /> Clear Selection
+                    </button>
+                  )}
+                </div>
                 <input 
                   type="text" 
                   placeholder="Search keywords..." 
@@ -631,7 +616,9 @@ export default function ContractWizard({ template, onBack }) {
                     </button>
                   ))}
                 </div>
-                <p className="text-[11px] text-slate-400 pt-1">Selected: <strong className="text-amber-400">{disputeResolution}</strong></p>
+                <p className="text-[11px] text-slate-400 pt-1">
+                  Selected: <strong className="text-amber-400">{disputeResolution || 'None (Unselected)'}</strong>
+                </p>
               </div>
 
               {/* SELECTABLE & FULLY EDITABLE CLAUSE TEXTS */}
@@ -650,10 +637,12 @@ export default function ContractWizard({ template, onBack }) {
                 </div>
 
                 {/* Dispute Resolution Text */}
-                <div className="space-y-1 bg-slate-950 p-3 rounded-xl border border-slate-800">
-                  <input type="text" value={disputeLabel} onChange={(e) => setDisputeLabel(e.target.value)} className="w-full px-2 py-1 bg-slate-900 border border-slate-800 rounded text-xs font-bold text-white mb-1" />
-                  <textarea rows={2} value={disputeClauseText} onChange={(e) => setDisputeClauseText(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white" />
-                </div>
+                {disputeResolution && (
+                  <div className="space-y-1 bg-slate-950 p-3 rounded-xl border border-slate-800">
+                    <input type="text" value={disputeLabel} onChange={(e) => setDisputeLabel(e.target.value)} className="w-full px-2 py-1 bg-slate-900 border border-slate-800 rounded text-xs font-bold text-white mb-1" />
+                    <textarea rows={2} value={disputeClauseText} onChange={(e) => setDisputeClauseText(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white" />
+                  </div>
+                )}
 
                 {/* Severability */}
                 <div className="space-y-1 bg-slate-950 p-3 rounded-xl border border-slate-800">
@@ -866,9 +855,11 @@ export default function ContractWizard({ template, onBack }) {
                     </p>
                   )}
 
-                  <p className="text-slate-700 leading-relaxed">
-                    <strong>{disputeLabel} ({disputeResolution}):</strong> {disputeClauseText}
-                  </p>
+                  {disputeResolution && (
+                    <p className="text-slate-700 leading-relaxed">
+                      <strong>{disputeLabel} ({disputeResolution}):</strong> {disputeClauseText}
+                    </p>
+                  )}
 
                   {includeSeverabilityClause && (
                     <p className="text-slate-700 leading-relaxed">
