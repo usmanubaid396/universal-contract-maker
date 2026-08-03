@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Building2, User, Download, Plus, Trash2, Save, Sparkles, Scale, FileText, Stamp, Palette, Shield } from 'lucide-react';
+import { ArrowLeft, Building2, User, Download, Plus, Trash2, Save, Sparkles, Scale, FileText, Stamp, Palette, Search } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 
 export default function ContractWizard({ template, onBack }) {
@@ -9,16 +9,15 @@ export default function ContractWizard({ template, onBack }) {
   const [partyA, setPartyA] = useState({ 
     name: '', representative: '', designation: '', address: '', logo: '', 
     showAdvanced: false, website: '', email: '', phone: '', taxId: '',
-    customFields: [] // [{ label: '', value: '' }]
+    customFields: [] 
   });
   
   const [partyB, setPartyB] = useState({ 
     name: '', representative: '', designation: '', address: '', logo: '', 
     showAdvanced: false, website: '', email: '', phone: '', taxId: '',
-    customFields: [] // [{ label: '', value: '' }]
+    customFields: [] 
   });
 
-  // Helper to add custom field to Party A or B
   const addPartyCustomField = (partyKey) => {
     if (partyKey === 'A') {
       setPartyA({ ...partyA, customFields: [...partyA.customFields, { label: '', value: '' }] });
@@ -62,19 +61,58 @@ export default function ContractWizard({ template, onBack }) {
   const [aiPrompt, setAiPrompt] = useState('');
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
-  // Expanded Legal Setup & Dispute Options
+  // Expanded Legal Setup & Dispute Options with 102 types list & Search
   const [governingLaw, setGoverningLaw] = useState('Pakistan');
   const [disputeResolution, setDisputeResolution] = useState('Binding Arbitration');
-  const [includeNotary, setIncludeNotary] = useState(true);
-  const [includeSealArea, setIncludeSealArea] = useState(true);
+  const [disputeSearchQuery, setDisputeSearchQuery] = useState('');
+  
+  const disputeTypesList = [
+    'Direct negotiation', 'Informal discussion', 'Internal complaint procedure', 'Manager-led resolution',
+    'Workplace grievance procedure', 'Internal appeal', 'Settlement discussion', 'Settlement conference',
+    'Without-prejudice negotiation', 'Demand letter / letter before action', 'Mediation', 'Facilitative mediation',
+    'Evaluative mediation', 'Transformative mediation', 'Narrative mediation', 'Online mediation',
+    'Court-annexed mediation', 'Employment mediation', 'Family mediation', 'Community mediation',
+    'Commercial mediation', 'Conciliation', 'Pre-claim conciliation', 'Shuttle diplomacy',
+    'Facilitated negotiation', 'Neutral evaluation', 'Early neutral evaluation (ENE)', 'Case evaluation',
+    'Mini-trial', 'Expert determination', 'Independent valuation', 'Dispute review board (DRB)',
+    'Dispute adjudication board (DAB)', 'Technical adjudication', 'Ombuds / ombudsman process', 'Independent investigation',
+    'Fact-finding', 'Special master or referee review', 'Arbitration', 'Domestic arbitration',
+    'International commercial arbitration', 'Institutional arbitration', 'Ad hoc arbitration', 'Expedited arbitration',
+    'Emergency arbitration', 'Documents-only arbitration', 'Baseball arbitration / final-offer arbitration', 'Interest arbitration',
+    'Rights arbitration / grievance arbitration', 'Labour arbitration', 'Consumer arbitration', 'Construction arbitration',
+    'Investment treaty arbitration', 'Sports arbitration', 'Domain-name arbitration', 'Med-arb',
+    'Arb-med', 'Arb-med-arb', 'Adjudication', 'Statutory adjudication',
+    'Civil court litigation', 'Commercial court litigation', 'Small-claims court', 'Employment tribunal',
+    'Labour court', 'Administrative tribunal', 'Administrative hearing', 'Wage claim / labour-standards claim',
+    'Labour inspectorate complaint', 'Human-rights or equality commission complaint', 'Consumer-protection authority complaint', 'Data-protection authority complaint',
+    'Financial ombudsman complaint', 'Housing tribunal / tenancy board', 'Tax appeal or tax tribunal', 'Social-security appeal',
+    'Immigration appeal', 'Public procurement challenge', 'Judicial review', 'Appeal',
+    'Reconsideration / review', 'Enforcement proceeding', 'Injunction or interim-relief application', 'Collective bargaining grievance procedure',
+    'Works council consultation/dispute process', 'Professional-body complaint', 'Medical malpractice or healthcare complaint process', 'Insurance appraisal process',
+    'Chargeback process', 'Platform dispute process', 'E-commerce online dispute resolution (ODR)', 'Cross-border mediation',
+    'Choice-of-court agreement', 'Forum-selection clause process', 'Recognition and enforcement of foreign judgment', 'Recognition and enforcement of arbitral award',
+    'Diplomatic protection / state-to-state process', 'Interstate dispute settlement', 'International Court of Justice proceedings', 'World Trade Organization dispute settlement',
+    'Investor–state conciliation', 'Treaty-based claims commission'
+  ];
+
+  const filteredDisputeTypes = disputeTypesList.filter(type => 
+    type.toLowerCase().includes(disputeSearchQuery.toLowerCase())
+  );
+
+  // Checkboxes for Clauses and Blocks
   const [includeGoverningLawClause, setIncludeGoverningLawClause] = useState(true);
   const [includeSeverabilityClause, setIncludeSeverabilityClause] = useState(true);
   const [includeEntireAgreementClause, setIncludeEntireAgreementClause] = useState(true);
+  const [includeConfidentialityClause, setIncludeConfidentialityClause] = useState(true);
+  const [includeLimitationOfLiability, setIncludeLimitationOfLiability] = useState(true);
+  const [includeForceMajeure, setIncludeForceMajeure] = useState(true);
+  const [includeNotary, setIncludeNotary] = useState(true);
+  const [includeSealArea, setIncludeSealArea] = useState(true);
 
   // Watermark
   const [watermark, setWatermark] = useState('None (Clean)');
 
-  // 50+ Professional Color Palette Themes
+  // 50+ Professional Color Palettes
   const colorThemes = {
     'Classic Slate': { primary: 'text-slate-900', border: 'border-slate-200', accent: 'bg-slate-50' },
     'Executive Navy': { primary: 'text-blue-950', border: 'border-blue-200', accent: 'bg-blue-50/50' },
@@ -135,7 +173,7 @@ export default function ContractWizard({ template, onBack }) {
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem(`pro_max_ultimate_${template.id}`);
+    const saved = localStorage.getItem(`pro_max_search_disputes_${template.id}`);
     if (saved) {
       try {
         const data = JSON.parse(saved);
@@ -153,6 +191,9 @@ export default function ContractWizard({ template, onBack }) {
         if (data.includeGoverningLawClause !== undefined) setIncludeGoverningLawClause(data.includeGoverningLawClause);
         if (data.includeSeverabilityClause !== undefined) setIncludeSeverabilityClause(data.includeSeverabilityClause);
         if (data.includeEntireAgreementClause !== undefined) setIncludeEntireAgreementClause(data.includeEntireAgreementClause);
+        if (data.includeConfidentialityClause !== undefined) setIncludeConfidentialityClause(data.includeConfidentialityClause);
+        if (data.includeLimitationOfLiability !== undefined) setIncludeLimitationOfLiability(data.includeLimitationOfLiability);
+        if (data.includeForceMajeure !== undefined) setIncludeForceMajeure(data.includeForceMajeure);
       } catch (e) {
         console.error('Failed to load draft');
       }
@@ -163,9 +204,10 @@ export default function ContractWizard({ template, onBack }) {
     const draftData = { 
       partyA, partyB, agreementTitle, effectiveDate, validityPeriod, contractBody, 
       customClauses, governingLaw, disputeResolution, watermark, selectedColorTheme,
-      includeGoverningLawClause, includeSeverabilityClause, includeEntireAgreementClause 
+      includeGoverningLawClause, includeSeverabilityClause, includeEntireAgreementClause,
+      includeConfidentialityClause, includeLimitationOfLiability, includeForceMajeure 
     };
-    localStorage.setItem(`pro_max_ultimate_${template.id}`, JSON.stringify(draftData));
+    localStorage.setItem(`pro_max_search_disputes_${template.id}`, JSON.stringify(draftData));
     setSaveStatus('Draft Saved Successfully!');
     setTimeout(() => setSaveStatus(''), 3000);
   };
@@ -247,7 +289,7 @@ export default function ContractWizard({ template, onBack }) {
         <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-6">
           <div className="border-b border-slate-800 pb-4">
             <h2 className="text-lg font-bold text-white">Document Generator Pro</h2>
-            <p className="text-xs text-slate-400">Configure parties, custom fields, dispute modes, watermarks, and colors.</p>
+            <p className="text-xs text-slate-400">Configure parties, search 102 dispute types, select clauses, and watermarks.</p>
           </div>
 
           {/* Navigation Tabs */}
@@ -308,12 +350,11 @@ export default function ContractWizard({ template, onBack }) {
                   <input type="text" value={partyA.phone} onChange={(e) => setPartyA({...partyA, phone: e.target.value})} placeholder="Phone Number" className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white" />
                   <input type="text" value={partyA.taxId} onChange={(e) => setPartyA({...partyA, taxId: e.target.value})} placeholder="Tax ID / Registration Number" className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white" />
                   
-                  {/* Custom User Added Blocks for Party A */}
                   <div className="space-y-2 pt-2 border-t border-slate-800">
                     <p className="text-[11px] font-bold text-slate-300">Custom Custom Fields:</p>
                     {partyA.customFields.map((cf, idx) => (
                       <div key={idx} className="flex gap-2 items-center">
-                        <input type="text" placeholder="Label (e.g. License #)" value={cf.label} onChange={(e) => updatePartyCustomField('A', idx, 'label', e.target.value)} className="w-1/3 px-2 py-1.5 bg-slate-900 border border-slate-800 rounded text-xs text-white" />
+                        <input type="text" placeholder="Label" value={cf.label} onChange={(e) => updatePartyCustomField('A', idx, 'label', e.target.value)} className="w-1/3 px-2 py-1.5 bg-slate-900 border border-slate-800 rounded text-xs text-white" />
                         <input type="text" placeholder="Value" value={cf.value} onChange={(e) => updatePartyCustomField('A', idx, 'value', e.target.value)} className="flex-1 px-2 py-1.5 bg-slate-900 border border-slate-800 rounded text-xs text-white" />
                         <button onClick={() => removePartyCustomField('A', idx)} className="text-red-400 p-1"><Trash2 className="h-3.5 w-3.5" /></button>
                       </div>
@@ -363,12 +404,11 @@ export default function ContractWizard({ template, onBack }) {
                   <input type="text" value={partyB.phone} onChange={(e) => setPartyB({...partyB, phone: e.target.value})} placeholder="Phone Number" className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white" />
                   <input type="text" value={partyB.taxId} onChange={(e) => setPartyB({...partyB, taxId: e.target.value})} placeholder="Tax ID / Registration Number" className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white" />
                   
-                  {/* Custom User Added Blocks for Party B */}
                   <div className="space-y-2 pt-2 border-t border-slate-800">
                     <p className="text-[11px] font-bold text-slate-300">Custom Custom Fields:</p>
                     {partyB.customFields.map((cf, idx) => (
                       <div key={idx} className="flex gap-2 items-center">
-                        <input type="text" placeholder="Label (e.g. License #)" value={cf.label} onChange={(e) => updatePartyCustomField('B', idx, 'label', e.target.value)} className="w-1/3 px-2 py-1.5 bg-slate-900 border border-slate-800 rounded text-xs text-white" />
+                        <input type="text" placeholder="Label" value={cf.label} onChange={(e) => updatePartyCustomField('B', idx, 'label', e.target.value)} className="w-1/3 px-2 py-1.5 bg-slate-900 border border-slate-800 rounded text-xs text-white" />
                         <input type="text" placeholder="Value" value={cf.value} onChange={(e) => updatePartyCustomField('B', idx, 'value', e.target.value)} className="flex-1 px-2 py-1.5 bg-slate-900 border border-slate-800 rounded text-xs text-white" />
                         <button onClick={() => removePartyCustomField('B', idx)} className="text-red-400 p-1"><Trash2 className="h-3.5 w-3.5" /></button>
                       </div>
@@ -429,49 +469,85 @@ export default function ContractWizard({ template, onBack }) {
             </div>
           )}
 
-          {/* TAB 4: LEGAL SETUP (Expanded with Dispute Types & Clauses) */}
+          {/* TAB 4: LEGAL SETUP WITH SEARCHABLE 102 DISPUTE TYPES & CLAUSE TOGGLES */}
           {activeTab === 'legal' && (
             <div className="space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center"><Scale className="h-4 w-4 mr-1.5" /> Legal Setup & Dispute Modes</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center"><Scale className="h-4 w-4 mr-1.5" /> Legal Setup & Dispute Search</h3>
+              
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1">Governing Jurisdiction Country / State</label>
                 <input type="text" value={governingLaw} onChange={(e) => setGoverningLaw(e.target.value)} className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
               </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">Dispute Resolution Type</label>
-                <select value={disputeResolution} onChange={(e) => setDisputeResolution(e.target.value)} className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white">
-                  <option value="Binding Arbitration (Commercial Rules)">Binding Arbitration (Commercial Rules)</option>
-                  <option value="Civil Litigation in Local Courts">Civil Litigation in Local Courts</option>
-                  <option value="Mediation Followed by Arbitration">Mediation Followed by Arbitration</option>
-                  <option value="Expert Determination & Independent Review">Expert Determination & Independent Review</option>
-                  <option value="International Commercial Arbitration (LCIA / ICC)">International Commercial Arbitration (LCIA / ICC)</option>
-                </select>
+
+              {/* SEARCHABLE DISPUTE RESOLUTION TYPES (102 Types) */}
+              <div className="space-y-2 bg-slate-950 p-3 rounded-2xl border border-slate-800">
+                <label className="block text-xs font-bold text-blue-400 flex items-center">
+                  <Search className="h-3.5 w-3.5 mr-1" /> Search & Select Dispute Method (102 types)
+                </label>
+                <input 
+                  type="text" 
+                  placeholder="Search keywords (e.g. mediation, arbitration, tribunal)..." 
+                  value={disputeSearchQuery} 
+                  onChange={(e) => setDisputeSearchQuery(e.target.value)} 
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                />
+                <div className="max-h-40 overflow-y-auto space-y-1 pr-1 pt-1">
+                  {filteredDisputeTypes.map((dt, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setDisputeResolution(dt)}
+                      className={`w-full text-left px-3 py-1.5 rounded-lg text-xs transition ${
+                        disputeResolution === dt ? 'bg-blue-600 text-white font-bold' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
+                      }`}
+                    >
+                      {dt}
+                    </button>
+                  ))}
+                  {filteredDisputeTypes.length === 0 && (
+                    <p className="text-[11px] text-slate-500 text-center py-2">No dispute method found.</p>
+                  )}
+                </div>
+                <p className="text-[11px] text-slate-400 pt-1">Selected: <strong className="text-amber-400">{disputeResolution}</strong></p>
               </div>
 
+              {/* SELECTABLE BLUE TICK CLAUSES */}
               <div className="space-y-2.5 pt-2 border-t border-slate-800">
-                <p className="text-xs font-bold text-slate-300">Standard Legal Clauses to Include:</p>
+                <p className="text-xs font-bold text-slate-300">Select Standard Legal Clauses to Include:</p>
                 <label className="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
-                  <input type="checkbox" checked={includeGoverningLawClause} onChange={(e) => setIncludeGoverningLawClause(e.target.checked)} className="rounded border-slate-700 bg-slate-950 text-blue-600" />
-                  <span>Include Governing Law & Jurisdiction Clause</span>
+                  <input type="checkbox" checked={includeGoverningLawClause} onChange={(e) => setIncludeGoverningLawClause(e.target.checked)} className="rounded border-slate-700 bg-slate-950 text-blue-600 focus:ring-blue-500" />
+                  <span>Governing Law & Jurisdiction Clause</span>
                 </label>
                 <label className="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
-                  <input type="checkbox" checked={includeSeverabilityClause} onChange={(e) => setIncludeSeverabilityClause(e.target.checked)} className="rounded border-slate-700 bg-slate-950 text-blue-600" />
-                  <span>Include Severability Clause</span>
+                  <input type="checkbox" checked={includeSeverabilityClause} onChange={(e) => setIncludeSeverabilityClause(e.target.checked)} className="rounded border-slate-700 bg-slate-950 text-blue-600 focus:ring-blue-500" />
+                  <span>Severability Clause</span>
                 </label>
                 <label className="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
-                  <input type="checkbox" checked={includeEntireAgreementClause} onChange={(e) => setIncludeEntireAgreementClause(e.target.checked)} className="rounded border-slate-700 bg-slate-950 text-blue-600" />
-                  <span>Include Entire Agreement Clause</span>
+                  <input type="checkbox" checked={includeEntireAgreementClause} onChange={(e) => setIncludeEntireAgreementClause(e.target.checked)} className="rounded border-slate-700 bg-slate-950 text-blue-600 focus:ring-blue-500" />
+                  <span>Entire Agreement Clause</span>
+                </label>
+                <label className="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
+                  <input type="checkbox" checked={includeConfidentialityClause} onChange={(e) => setIncludeConfidentialityClause(e.target.checked)} className="rounded border-slate-700 bg-slate-950 text-blue-600 focus:ring-blue-500" />
+                  <span>Confidentiality & Non-Disclosure Clause</span>
+                </label>
+                <label className="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
+                  <input type="checkbox" checked={includeLimitationOfLiability} onChange={(e) => setIncludeLimitationOfLiability(e.target.checked)} className="rounded border-slate-700 bg-slate-950 text-blue-600 focus:ring-blue-500" />
+                  <span>Limitation of Liability Clause</span>
+                </label>
+                <label className="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
+                  <input type="checkbox" checked={includeForceMajeure} onChange={(e) => setIncludeForceMajeure(e.target.checked)} className="rounded border-slate-700 bg-slate-950 text-blue-600 focus:ring-blue-500" />
+                  <span>Force Majeure Clause</span>
                 </label>
               </div>
 
+              {/* EXECUTION BLOCKS & STAMP AREAS */}
               <div className="space-y-2.5 pt-2 border-t border-slate-800">
                 <p className="text-xs font-bold text-slate-300">Execution Blocks & Stamp Areas:</p>
                 <label className="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
-                  <input type="checkbox" checked={includeNotary} onChange={(e) => setIncludeNotary(e.target.checked)} className="rounded border-slate-700 bg-slate-950 text-blue-600" />
+                  <input type="checkbox" checked={includeNotary} onChange={(e) => setIncludeNotary(e.target.checked)} className="rounded border-slate-700 bg-slate-950 text-blue-600 focus:ring-blue-500" />
                   <span>Include Witness / Notary Public Block</span>
                 </label>
                 <label className="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
-                  <input type="checkbox" checked={includeSealArea} onChange={(e) => setIncludeSealArea(e.target.checked)} className="rounded border-slate-700 bg-slate-950 text-blue-600" />
+                  <input type="checkbox" checked={includeSealArea} onChange={(e) => setIncludeSealArea(e.target.checked)} className="rounded border-slate-700 bg-slate-950 text-blue-600 focus:ring-blue-500" />
                   <span>Include Company Stamp & Seal Box</span>
                 </label>
               </div>
@@ -558,7 +634,7 @@ export default function ContractWizard({ template, onBack }) {
                 This <strong>{agreementTitle}</strong> ("Agreement") is entered into and made effective as of <strong>{effectiveDate}</strong>, with a validity duration of <strong>{validityPeriod}</strong>, by and between the following authorized entities:
               </p>
 
-              {/* Parties Box with Custom User Lines */}
+              {/* Parties Box with Custom User Added Lines */}
               <div className="grid grid-cols-2 gap-4">
                 <div className={`p-3.5 rounded-xl border ${currentColor.border} ${currentColor.accent} space-y-1`}>
                   <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">First Party (Issuer)</p>
@@ -605,29 +681,47 @@ export default function ContractWizard({ template, onBack }) {
                 </ol>
               </div>
 
-              {/* Legal Setup & Expanded Dispute Resolution Clauses */}
+              {/* Legal Setup & Selected Clauses / Dispute Resolution */}
               <div className="space-y-3 pt-2">
-                <h5 className="font-bold text-xs mb-1">3. Legal Setup & Dispute Governance</h5>
+                <h5 className="font-bold text-xs mb-1">3. Legal Governance & Dispute Resolution</h5>
                 
                 {includeGoverningLawClause && (
                   <p className="text-slate-700">
-                    <strong>Governing Law:</strong> This Agreement shall be interpreted, construed, and governed in accordance with the laws of <strong>{governingLaw}</strong>, without regard to its conflict of law principles.
+                    <strong>Governing Law:</strong> This Agreement shall be interpreted, construed, and governed in accordance with the laws of <strong>{governingLaw}</strong>.
                   </p>
                 )}
 
                 <p className="text-slate-700">
-                  <strong>Dispute Resolution Mechanism:</strong> Any dispute, controversy, or claim arising out of or relating to this contract, including its formation or breach, shall be settled through <strong>{disputeResolution}</strong> in the jurisdiction specified above.
+                  <strong>Dispute Resolution Method:</strong> Any dispute arising from this contract shall be resolved via <strong>{disputeResolution}</strong> in accordance with applicable rules.
                 </p>
 
                 {includeSeverabilityClause && (
                   <p className="text-slate-700">
-                    <strong>Severability:</strong> If any provision of this Agreement is held to be invalid or unenforceable, such provision shall be modified to the minimum extent necessary to make it valid and enforceable, and the remaining provisions shall remain in full force and effect.
+                    <strong>Severability:</strong> If any provision of this Agreement is held invalid, the remainder shall continue in full force and effect.
                   </p>
                 )}
 
                 {includeEntireAgreementClause && (
                   <p className="text-slate-700">
-                    <strong>Entire Agreement:</strong> This document constitutes the entire agreement between the parties pertaining to the subject matter hereof and supersedes all prior agreements, understandings, negotiations, and discussions.
+                    <strong>Entire Agreement:</strong> This document constitutes the entire agreement between the parties and supersedes all prior discussions.
+                  </p>
+                )}
+
+                {includeConfidentialityClause && (
+                  <p className="text-slate-700">
+                    <strong>Confidentiality:</strong> Both parties agree to protect proprietary data and not disclose confidential information to third parties without prior written consent.
+                  </p>
+                )}
+
+                {includeLimitationOfLiability && (
+                  <p className="text-slate-700">
+                    <strong>Limitation of Liability:</strong> Neither party shall be liable for indirect, incidental, or consequential damages arising out of this agreement.
+                  </p>
+                )}
+
+                {includeForceMajeure && (
+                  <p className="text-slate-700">
+                    <strong>Force Majeure:</strong> Neither party shall be liable for failure to perform due to acts beyond reasonable control (e.g., natural disasters, war, strikes).
                   </p>
                 )}
               </div>
