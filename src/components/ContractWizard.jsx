@@ -99,7 +99,7 @@ export default function ContractWizard({ template, onBack }) {
   // Section 3 Headings & Editable Legal Clauses
   const [sec3Heading, setSec3Heading] = useState('3. Legal Governance & Dispute Resolution');
   const [governingLaw, setGoverningLaw] = useState('Pakistan');
-  const [disputeResolution, setDisputeResolution] = useState('Binding Arbitration'); // Can now be cleared (null / empty)
+  const [disputeResolution, setDisputeResolution] = useState('Binding Arbitration'); 
   const [disputeSearchQuery, setDisputeSearchQuery] = useState('');
   
   const disputeTypesList = [
