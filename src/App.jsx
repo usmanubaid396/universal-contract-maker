@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import { Routes, Route, useNavigate, useParams, Link } from 'react-router-dom';
 import Fuse from 'fuse.js';
 import { Search, FileText, ArrowRight, ShieldCheck, Sparkles, CheckCircle, Scale, Zap, Lock, ChevronLeft, ChevronRight } from 'lucide-react';
 import ContractWizard from './components/ContractWizard';
@@ -111,7 +111,7 @@ function HomeView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12; // Shows 12 items per page for a clean professional look
+  const itemsPerPage = 12;
   const navigate = useNavigate();
 
   const fuse = useMemo(() => {
@@ -136,7 +136,6 @@ function HomeView() {
     return results;
   }, [searchQuery, selectedCategory, fuse]);
 
-  // Pagination calculation
   const totalPages = Math.ceil(filteredTemplates.length / itemsPerPage) || 1;
   const paginatedTemplates = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
@@ -146,12 +145,12 @@ function HomeView() {
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
     setSearchQuery('');
-    setCurrentPage(1); // Reset to page 1 on category change
+    setCurrentPage(1);
   };
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
-    setCurrentPage(1); // Reset to page 1 on search
+    setCurrentPage(1);
   };
 
   return (
@@ -310,6 +309,49 @@ function WizardWrapper() {
   );
 }
 
+function PrivacyPolicyView() {
+  return (
+    <div className="max-w-4xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-12 space-y-8 text-slate-300">
+      <div className="border-b border-slate-800 pb-6">
+        <h1 className="text-3xl font-extrabold text-white">Privacy Policy</h1>
+        <p className="text-xs text-slate-500 mt-1">Last Updated: August 3, 2026</p>
+      </div>
+      <div className="space-y-4 text-sm leading-relaxed">
+        <p>Universal Contract Generator Pro respects your privacy. This Privacy Policy explains how we collect, use, and protect your information when you use our web application and services.</p>
+        <h2 className="text-lg font-bold text-white pt-2">1. Information We Collect</h2>
+        <p>Data inputted into our document wizard, including company names, representative details, addresses, custom clauses, tax IDs, and uploaded brand logos. Certain draft configurations and templates are temporarily stored locally in your browser via localStorage.</p>
+        <h2 className="text-lg font-bold text-white pt-2">2. How We Use Your Information</h2>
+        <p>We use your information to render, generate, and export your customized agreements and PDFs, maintain and secure our software performance, and fulfill technical support requests.</p>
+        <h2 className="text-lg font-bold text-white pt-2">3. Security</h2>
+        <p>Most document generation tasks and rendering processes happen directly within your browser environment. We implement robust security protocols to protect data in transit and at rest.</p>
+      </div>
+    </div>
+  );
+}
+
+function TermsOfServiceView() {
+  return (
+    <div className="max-w-4xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-12 space-y-8 text-slate-300">
+      <div className="border-b border-slate-800 pb-6">
+        <h1 className="text-3xl font-extrabold text-white">Terms of Service</h1>
+        <p className="text-xs text-slate-500 mt-1">Last Updated: August 3, 2026</p>
+      </div>
+      <div className="space-y-4 text-sm leading-relaxed">
+        <p>Welcome to Universal Contract Generator Pro. By accessing or using our website, application, and document generation tools, you agree to be bound by these Terms of Service.</p>
+        
+        <h2 className="text-lg font-bold text-white pt-2">1. Nature of Service & Not Legal Advice</h2>
+        <p>Universal Contract Generator Pro is a technology platform providing document drafting software and templates. <strong>We are NOT a law firm</strong>, legal counsel, or a substitute for an attorney or law firm.</p>
+        <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-2xl text-amber-200">
+          <strong>Mandatory Legal Review Disclaimer:</strong> WE MAKE NO WARRANTY, REPRESENTATION, OR GUARANTEE AS TO THE LEGAL SUFFICIENCY, ACCURACY, COMPLETENESS, ENFORCEABILITY, OR VALIDITY OF ANY DOCUMENT GENERATED THROUGH THIS PLATFORM. You are solely responsible for reviewing, editing, and validating all documents with a qualified, licensed attorney in your relevant jurisdiction before execution or use.
+        </div>
+
+        <h2 className="text-lg font-bold text-white pt-2">2. Limitation of Liability</h2>
+        <p>To the maximum extent permitted by applicable law, Universal Contract Generator Pro shall not be liable for any direct, indirect, incidental, special, consequential, or punitive damages arising out of or in any way connected with your use of the platform or generated templates.</p>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const navigate = useNavigate();
 
@@ -345,13 +387,24 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomeView />} />
           <Route path="/agreement/:id" element={<WizardWrapper />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyView />} />
+          <Route path="/terms-of-service" element={<TermsOfServiceView />} />
         </Routes>
       </main>
 
-      {/* Footer */}
+      {/* Footer with SEO-friendly external page links */}
       <footer className="border-t border-slate-800/80 bg-slate-950 py-8 mt-20">
-        <div className="max-w-7xl mx-auto px-6 text-center text-xs text-slate-500">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 space-y-4 sm:space-y-0">
           <p>© {new Date().getFullYear()} Universal Contract Builder. Professional Legal Document Automation Suite.</p>
+          <div className="flex items-center space-x-6 font-medium text-slate-400">
+            <Link to="/privacy-policy" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition">
+              Privacy Policy
+            </Link>
+            <span className="text-slate-700">•</span>
+            <Link to="/terms-of-service" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition">
+              Terms & Conditions
+            </Link>
+          </div>
         </div>
       </footer>
     </div>
