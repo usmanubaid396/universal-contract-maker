@@ -5,7 +5,6 @@ import { Search, FileText, ArrowRight, ShieldCheck, Sparkles, CheckCircle, Scale
 import ContractWizard from './components/ContractWizard';
 
 const contractTemplates = [
-  // --- First 50 Templates ---
   { id: 'freelance-services', title: 'Freelance Services Agreement', category: 'Freelance', description: 'Work performed in exchange for a fee.', keywords: ['freelance services', 'fee', 'work performed', 'gigs'] },
   { id: 'consulting', title: 'Consulting Agreement', category: 'Business', description: 'Advice or specialist services for payment.', keywords: ['consulting', 'advisor', 'specialist services', 'expert advice'] },
   { id: 'independent-contractor', title: 'Independent Contractor Agreement', category: 'Freelance', description: 'Project-based work by a self-employed person.', keywords: ['contractor', 'self-employed', 'project work', 'freelancer'] },
@@ -56,8 +55,6 @@ const contractTemplates = [
   { id: 'small-dispute-settlement', title: 'Settlement Agreement for a Small Private Dispute', category: 'Legal', description: 'Documents a compromise and payment to resolve a claim.', keywords: ['settlement agreement', 'dispute resolution', 'private claim', 'compromise'] },
   { id: 'event-participation-consent', title: 'Consent/Release for Event Participation', category: 'Legal', description: 'Acknowledges risks and permissions, though it cannot waive every legal claim.', keywords: ['event participation', 'consent form', 'liability release', 'risk waiver'] },
   { id: 'mou-letter-of-intent', title: 'Letter of Intent / Memorandum of Understanding (MOU)', category: 'Business', description: 'Records proposed terms before a full agreement; specify which clauses are binding.', keywords: ['mou', 'memorandum of understanding', 'letter of intent', 'proposed terms'] },
-
-  // --- Next 50 Templates ---
   { id: 'personal-training', title: 'Personal Training Agreement', category: 'Fitness', description: 'Fitness sessions, fees, cancellation rules, and health disclosures.', keywords: ['personal training', 'fitness sessions', 'gym trainer', 'workout terms'] },
   { id: 'music-lesson', title: 'Music Lesson Agreement', category: 'Education', description: 'Lesson schedule, payment, missed lessons, and equipment expectations.', keywords: ['music lesson', 'guitar tutor', 'piano lessons', 'music teacher'] },
   { id: 'dance-lesson', title: 'Dance Lesson Agreement', category: 'Education', description: 'Class or private-instruction terms and attendance rules.', keywords: ['dance lesson', 'dance class', 'private instruction', 'choreography'] },
@@ -137,7 +134,6 @@ function HomeView() {
 
   return (
     <div className="space-y-12">
-      {/* Hero Section */}
       <div className="text-center max-w-3xl mx-auto space-y-6">
         <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold tracking-wide">
           <Sparkles className="w-3.5 h-3.5" />
@@ -149,10 +145,9 @@ function HomeView() {
         </h1>
         
         <p className="text-slate-400 text-lg sm:text-xl font-normal leading-relaxed">
-          Search via random keywords or browse structured categories, customize clauses, add your brand logos, and generate export-ready agreements instantly.
+          Each template has its own unique SEO URL. Search keywords, customize clauses, add your brand logos, and export instantly.
         </p>
 
-        {/* Advanced Search Bar Section */}
         <div className="pt-4">
           <div className="relative max-w-2xl mx-auto shadow-2xl rounded-2xl group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl blur opacity-30 group-hover:opacity-75 transition duration-300 pointer-events-none" />
@@ -162,13 +157,12 @@ function HomeView() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search random keywords e.g., 'personal trainer', 'guitar lessons', 'loan agreement'..."
+                placeholder="Search keywords e.g., 'personal trainer', 'nda', 'loan'..."
                 className="w-full bg-transparent text-slate-100 placeholder-slate-500 focus:outline-none text-base font-medium"
               />
             </div>
           </div>
 
-          {/* Category Filter Pills */}
           <div className="flex flex-wrap items-center justify-center gap-2 mt-6 max-h-40 overflow-y-auto p-1">
             {categories.map((category) => (
               <button
@@ -187,7 +181,6 @@ function HomeView() {
         </div>
       </div>
 
-      {/* Template Grid Section */}
       <div className="space-y-6 pt-6">
         <div className="flex items-center justify-between border-b border-slate-800 pb-4">
           <h2 className="text-xl font-bold text-white flex items-center">
@@ -234,18 +227,6 @@ function HomeView() {
             </div>
           ))}
         </div>
-
-        {filteredTemplates.length === 0 && (
-          <div className="text-center py-16 bg-slate-900/40 rounded-2xl border border-slate-800">
-            <p className="text-slate-400 text-base mb-4">No matching agreements found for this query.</p>
-            <button
-              onClick={() => setSelectedCategory('All')}
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition shadow-lg shadow-blue-600/20"
-            >
-              View All Templates
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -269,11 +250,8 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col relative overflow-x-hidden">
-      
-      {/* Background Glow Elements */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-gradient-to-tr from-blue-600/20 to-indigo-600/10 blur-[120px] pointer-events-none rounded-full" />
 
-      {/* Professional Navbar */}
       <header className="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div 
@@ -296,7 +274,6 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Routed Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-12 relative z-10">
         <Routes>
           <Route path="/" element={<HomeView />} />
@@ -304,13 +281,11 @@ export default function App() {
         </Routes>
       </main>
 
-      {/* Footer */}
       <footer className="border-t border-slate-800/80 bg-slate-950 py-8 mt-20">
         <div className="max-w-7xl mx-auto px-6 text-center text-xs text-slate-500">
           <p>© {new Date().getFullYear()} Universal Contract Builder. Professional Multi-Page SEO Legal Suite.</p>
         </div>
       </footer>
-
     </div>
   );
 }
